@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace DapperExtensions.Sql
@@ -18,9 +19,29 @@ namespace DapperExtensions.Sql
             get { return ']'; }
         }
 
-        public override string GetIdentitySql(string tableName)
+        public override string GetIdentitySql(Type memberType)
         {
-            return string.Format("SELECT CAST(SCOPE_IDENTITY()  AS BIGINT) AS [Id]");
+            string sqlType;
+
+            switch (memberType)
+            {
+                case var _ when memberType == typeof(short):
+                    sqlType = "SMALLINT";
+                    break;
+
+                case var _ when memberType == typeof(int):
+                    sqlType = "INT";
+                    break;
+
+                case var _ when memberType == typeof(long):
+                    sqlType = "BIGINT";
+                    break;
+
+                default:
+                    return string.Empty;
+            }
+
+            return $"SELECT CAST(SCOPE_IDENTITY() AS {sqlType}) AS [Id]";
         }
 
         public override string GetPagingSql(string sql, int page, int resultsPerPage, IDictionary<string, object> parameters, string partitionBy)

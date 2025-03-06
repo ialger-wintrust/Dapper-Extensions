@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netcoreapp2.1;netcoreapp3.1;net461;net5.0;netstandard2.0;netstandard2.1;</TargetFrameworks>
+		<TargetFrameworks>net8.0</TargetFrameworks>
 		<Version>1.7.0</Version>
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 		<LangVersion>8.0</LangVersion>
@@ -86,14 +86,17 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-		<PackageReference Include="Newtonsoft.Json" version="13.0.2" />
-		<PackageReference Include="Dapper" Version="2.0.90" />
-		<PackageReference Include="Slapper.AutoMapper" Version="2.0.1" targetFramework="$(TargetFramework)" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
+		<PackageReference Include="Newtonsoft.Json" version="13.0.3" />
+		<PackageReference Include="Dapper" Version="2.1.66" />
+		<PackageReference Include="Slapper.AutoMapper" Version="2.0.5" targetFramework="$(TargetFramework)" />
 		<PackageReference Include="System.Data.Common" Version="4.3.0" />
+		<PackageReference Include="System.Private.Uri" Version="4.3.2" />
+		<PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' != 'net461' and '$(TargetFramework)' != 'net461'">
-		<PackageReference Include="Oracle.ManagedDataAccess.Core" Version="2.19.110" />
+		<PackageReference Include="Oracle.ManagedDataAccess.Core" Version="23.7.0" />
 		<PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
 	</ItemGroup>
 

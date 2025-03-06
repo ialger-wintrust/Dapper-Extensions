@@ -19,28 +19,51 @@ namespace DapperExtensions
     {
         ISqlGenerator SqlGenerator { get; }
         string LastExecutedCommand { get; }
+
         T Get<T>(IDbConnection connection, dynamic id, IDbTransaction transaction, int? commandTimeout, IList<IReferenceMap> includedProperties = null);
+
         TOut GetPartial<TIn, TOut>(IDbConnection connection, Expression<Func<TIn, TOut>> func, dynamic id, IDbTransaction transaction, int? commandTimeout, IList<IReferenceMap> includedProperties = null) where TIn : class where TOut : class;
+
         void Insert<T>(IDbConnection connection, IEnumerable<T> entities, IDbTransaction transaction, int? commandTimeout);
+
         dynamic Insert<T>(IDbConnection connection, T entity, IDbTransaction transaction, int? commandTimeout);
+
         bool Update<T>(IDbConnection connection, T entity, IDbTransaction transaction, int? commandTimeout, bool ignoreAllKeyProperties);
+
         void Update<T>(IDbConnection connection, IEnumerable<T> entities, IDbTransaction transaction, int? commandTimeout, bool ignoreAllKeyProperties);
+
         bool UpdatePartial<TIn, TOut>(IDbConnection connection, TIn entity, Expression<Func<TIn, TOut>> func, IDbTransaction transaction, int? commandTimeout, bool ignoreAllKeyProperties) where TIn : class;
+
         void UpdatePartial<TIn, TOut>(IDbConnection connection, IEnumerable<TIn> entities, Expression<Func<TIn, TOut>> func, IDbTransaction transaction, int? commandTimeout, bool ignoreAllKeyProperties) where TIn : class;
+
         bool Delete<T>(IDbConnection connection, T entity, IDbTransaction transaction, int? commandTimeout);
+
         void Delete<T>(IDbConnection connection, IEnumerable<T> entities, IDbTransaction transaction, int? commandTimeout);
+
         bool Delete<T>(IDbConnection connection, object predicate, IDbTransaction transaction, int? commandTimeout);
+
         IEnumerable<T> GetList<T>(IDbConnection connection, object predicate, IList<ISort> sort, IDbTransaction transaction, int? commandTimeout, bool buffered, IList<IReferenceMap> includedProperties = null);
+
         IEnumerable<TOut> GetPartialList<TIn, TOut>(IDbConnection connection, Expression<Func<TIn, TOut>> func, object predicate, IList<ISort> sort, IDbTransaction transaction, int? commandTimeout, bool buffered, IList<IReferenceMap> includedProperties = null) where TIn : class;
+
         IEnumerable<T> GetListAutoMap<T>(IDbConnection connection, object predicate, IList<ISort> sort, IDbTransaction transaction, int? commandTimeout, bool buffered, IList<IReferenceMap> includedProperties = null);
+
         IEnumerable<TOut> GetPartialListAutoMap<TIn, TOut>(IDbConnection connection, Expression<Func<TIn, TOut>> func, object predicate, IList<ISort> sort, IDbTransaction transaction, int? commandTimeout, bool buffered, IList<IReferenceMap> includedProperties = null) where TIn : class;
+
         IEnumerable<T> GetPage<T>(IDbConnection connection, object predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction, int? commandTimeout, bool buffered, IList<IReferenceMap> includedProperties = null);
+
         IEnumerable<TOut> GetPartialPage<TIn, TOut>(IDbConnection connection, Expression<Func<TIn, TOut>> func, object predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction, int? commandTimeout, bool buffered, IList<IReferenceMap> includedProperties = null) where TIn : class where TOut : class;
+
         IEnumerable<T> GetPageAutoMap<T>(IDbConnection connection, object predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction, int? commandTimeout, bool buffered, IList<IReferenceMap> includedProperties = null);
+
         IEnumerable<TOut> GetPartialPageAutoMap<TIn, TOut>(IDbConnection connection, Expression<Func<TIn, TOut>> func, object predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction, int? commandTimeout, bool buffered, IList<IReferenceMap> includedProperties = null) where TIn : class where TOut : class;
+
         IEnumerable<T> GetSet<T>(IDbConnection connection, object predicate, IList<ISort> sort, int firstResult, int maxResults, IDbTransaction transaction, int? commandTimeout, bool buffered, IList<IReferenceMap> includedProperties = null);
+
         IEnumerable<TOut> GetPartialSet<TIn, TOut>(IDbConnection connection, Expression<Func<TIn, TOut>> func, object predicate, IList<ISort> sort, int firstResult, int maxResults, IDbTransaction transaction, int? commandTimeout, bool buffered, IList<IReferenceMap> includedProperties = null) where TIn : class where TOut : class;
+
         int Count<T>(IDbConnection connection, object predicate, IDbTransaction transaction, int? commandTimeout, IList<IReferenceMap> includedProperties = null);
+
         IMultipleResultReader GetMultiple(IDbConnection connection, GetMultiplePredicate predicate, IDbTransaction transaction, int? commandTimeout, IList<IReferenceMap> includedProperties = null);
     }
 
@@ -607,22 +630,23 @@ namespace DapperExtensions
             return dynamicParameters.Get<object>(SqlGenerator.Configuration.Dialect.ParameterPrefix + "IdOutParam");
         }
 
-        private object InsertIdentity(IDbConnection connection, IDbTransaction transaction,
-            int? commandTimeout, IClassMapper classMap, string sql, DynamicParameters dynamicParameters)
+        private object? InsertIdentity(IDbConnection connection, IDbTransaction transaction,
+            int? commandTimeout, string sql, IMemberMap identityColumn, DynamicParameters dynamicParameters)
         {
-            IEnumerable<long> result;
+            var identitySql = SqlGenerator.IdentitySql(identityColumn);
 
             if (SqlGenerator.SupportsMultipleStatements())
             {
-                sql += SqlGenerator.Configuration.Dialect.BatchSeperator + SqlGenerator.IdentitySql(classMap);
-                result = connection.Query<long>(sql, dynamicParameters, transaction, false, commandTimeout, CommandType.Text);
+                sql += SqlGenerator.Configuration.Dialect.BatchSeperator + identitySql;
             }
             else
             {
                 connection.Execute(sql, dynamicParameters, transaction, commandTimeout, CommandType.Text);
-                sql = SqlGenerator.IdentitySql(classMap);
-                result = connection.Query<long>(sql, dynamicParameters, transaction, false, commandTimeout, CommandType.Text);
+                sql = identitySql;
             }
+
+            var result = connection.Query<dynamic>(sql, dynamicParameters, transaction, false, commandTimeout, CommandType.Text);
+
             LastExecutedCommand = sql;
 
             // We are only interested in the first identity, but we are iterating over all resulting items (if any).
@@ -635,7 +659,7 @@ namespace DapperExtensions
                 {
                     continue;
                 }
-                keyValue = identityValue;
+                keyValue = identityValue.Id;
                 hasResult = true;
             }
 
@@ -643,13 +667,11 @@ namespace DapperExtensions
             {
                 throw new InvalidOperationException("The source sequence is empty.");
             }
-            else
-            {
-                return keyValue;
-            }
+
+            return keyValue;
         }
 
-        private IDictionary<string, object> AddSequenceParameter<T>(IDbConnection connection, T entity, 
+        private IDictionary<string, object> AddSequenceParameter<T>(IDbConnection connection, T entity,
             IMemberMap key, DynamicParameters dynamicParameters, IDictionary<string, object> keyValues)
         {
             var query = $"select {key.SequenceName}.nextval seq from dual";
@@ -703,11 +725,20 @@ namespace DapperExtensions
                 }
                 else
                 {
-                    keyValue = InsertIdentity(connection, transaction, commandTimeout, classMap, sql, dynamicParameters);
+                    keyValue = InsertIdentity(connection, transaction, commandTimeout, sql, identityColumn, dynamicParameters);
                 }
 
+                var expectedValue = Convert.ChangeType(keyValue, keyColumn.MemberType);
+
                 keyValues.Add(keyColumn.Name, keyValue);
-                keyColumn.SetValue(entity, keyValue);
+                try
+                {
+                    keyColumn.SetValue(entity, keyValue);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
             }
             else
             {

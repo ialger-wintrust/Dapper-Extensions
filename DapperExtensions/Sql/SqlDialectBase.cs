@@ -16,15 +16,25 @@ namespace DapperExtensions.Sql
         bool SupportsCountOfSubquery { get; }
         char ParameterPrefix { get; }
         string EmptyExpression { get; }
+
         string GetTableName(string schemaName, string tableName, string alias);
+
         string GetColumnName(string prefix, string columnName, string alias);
-        string GetIdentitySql(string tableName);
+
+        string GetIdentitySql(Type identityType);
+
         string GetPagingSql(string sql, int page, int resultsPerPage, IDictionary<string, object> parameters, string partitionBy);
+
         string GetSetSql(string sql, int firstResult, int maxResults, IDictionary<string, object> parameters);
+
         bool IsQuoted(string value);
+
         string QuoteString(string value);
+
         string GetDatabaseFunctionString(DatabaseFunction databaseFunction, string columnName, string functionParameters = "");
+
         void EnableCaseInsensitive(IDbConnection connection);
+
         string GetCountSql(string sql);
     }
 
@@ -119,8 +129,10 @@ namespace DapperExtensions.Sql
             return (((page == 0 ? 1 : page) - 1) * resultsPerPage);
         }
 
-        public abstract string GetIdentitySql(string tableName);
+        public abstract string GetIdentitySql(Type identityType);
+
         public abstract string GetPagingSql(string sql, int page, int resultsPerPage, IDictionary<string, object> parameters, string partitionBy);
+
         public abstract string GetSetSql(string sql, int firstResult, int maxResults, IDictionary<string, object> parameters);
 
         public virtual bool IsQuoted(string value)

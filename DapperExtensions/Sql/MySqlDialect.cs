@@ -19,7 +19,7 @@ namespace DapperExtensions.Sql
             get { return '`'; }
         }
 
-        public override string GetIdentitySql(string tableName)
+        public override string GetIdentitySql(Type identityColumnType)
         {
             return "SELECT CONVERT(LAST_INSERT_ID(), SIGNED INTEGER) AS ID";
         }

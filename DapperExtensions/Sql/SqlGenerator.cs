@@ -13,21 +13,31 @@ namespace DapperExtensions.Sql
         IDapperExtensionsConfiguration Configuration { get; }
         IList<IColumn> AllColumns { get; }
         IList<Table> MappedTables { get; }
+
         bool SupportsMultipleStatements();
 
         string Select(IClassMapper classMap, IPredicate predicate, IList<ISort> sort, IDictionary<string, object> parameters, IList<IProjection> colsToSelect, IList<IReferenceMap> includedProperties = null);
+
         string SelectPaged(IClassMapper classMap, IPredicate predicate, IList<ISort> sort, int page, int resultsPerPage, IDictionary<string, object> parameters, IList<IProjection> colsToSelect, IList<IReferenceMap> includedProperties = null);
+
         string SelectSet(IClassMapper classMap, IPredicate predicate, IList<ISort> sort, int firstResult, int maxResults, IDictionary<string, object> parameters, IList<IProjection> colsToSelect, IList<IReferenceMap> includedProperties = null);
+
         string Count(IClassMapper classMap, IPredicate predicate, IDictionary<string, object> parameters, IList<IReferenceMap> includedProperties = null);
 
         string Insert(IClassMapper classMap);
+
         string Update(IClassMapper classMap, IPredicate predicate, IDictionary<string, object> parameters, bool ignoreAllKeyProperties, IList<IProjection> colsToUpdate);
+
         string Delete(IClassMapper classMap, IPredicate predicate, IDictionary<string, object> parameters);
 
-        string IdentitySql(IClassMapper classMap);
+        string IdentitySql(IMemberMap identityColumn);
+
         string GetTableName(IClassMapper map, bool useAlias = false);
+
         string GetColumnName(IClassMapper map, IMemberMap property, bool includeAlias, bool isDml = false, bool includePrefix = true);
+
         string GetColumnName(IClassMapper map, string propertyName, bool includeAlias, bool includePrefix = true);
+
         string GetColumnName(IColumn column, bool includeAlias, bool includePrefix = true);
     }
 
@@ -246,7 +256,9 @@ namespace DapperExtensions.Sql
             if (triggerIdentityColumn.Count > 0)
             {
                 if (triggerIdentityColumn.Count > 1)
+                {
                     throw new ArgumentException("TriggerIdentity generator cannot be used with multi-column keys");
+                }
 
                 sql += $" RETURNING {triggerIdentityColumn.Select(p => GetColumnName(classMap, p, false, includePrefix: false)).First()} INTO {Configuration.Dialect.ParameterPrefix}IdOutParam";
             }
@@ -315,9 +327,9 @@ namespace DapperExtensions.Sql
             return sql.ToString();
         }
 
-        public virtual string IdentitySql(IClassMapper classMap)
+        public virtual string IdentitySql(IMemberMap identityColumn)
         {
-            return Configuration.Dialect.GetIdentitySql(GetTableName(classMap));
+            return Configuration.Dialect.GetIdentitySql(identityColumn.MemberType);
         }
 
         public virtual string GetReferenceKey(IMemberMap map)
@@ -733,6 +745,7 @@ namespace DapperExtensions.Sql
             }
             return tables;
         }
+
         public void MapTables(IClassMapper classMap, IList<IReferenceMap> includedProperties = null)
         {
             Tables = new List<Table>();

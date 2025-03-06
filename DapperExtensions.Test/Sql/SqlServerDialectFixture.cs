@@ -5,6 +5,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using NUnit.Framework.Legacy;
 
 namespace DapperExtensions.Test.Sql
 {
@@ -29,9 +30,9 @@ namespace DapperExtensions.Test.Sql
             [Test]
             public void DatabaseFunctionTests()
             {
-                Assert.IsTrue("foo".Equals(Dialect.GetDatabaseFunctionString(DatabaseFunction.None, "foo"), StringComparison.InvariantCultureIgnoreCase));
-                Assert.IsTrue("IsNull(foo, newFoo)".Equals(Dialect.GetDatabaseFunctionString(DatabaseFunction.NullValue, "foo", "newFoo"), StringComparison.InvariantCultureIgnoreCase));
-                Assert.IsTrue("Truncate(foo)".Equals(Dialect.GetDatabaseFunctionString(DatabaseFunction.Truncate, "foo"), StringComparison.InvariantCultureIgnoreCase));
+                Assert.That("foo".Equals(Dialect.GetDatabaseFunctionString(DatabaseFunction.None, "foo"), StringComparison.InvariantCultureIgnoreCase));
+                Assert.That("IsNull(foo, newFoo)".Equals(Dialect.GetDatabaseFunctionString(DatabaseFunction.NullValue, "foo", "newFoo"), StringComparison.InvariantCultureIgnoreCase));
+                Assert.That("Truncate(foo)".Equals(Dialect.GetDatabaseFunctionString(DatabaseFunction.Truncate, "foo"), StringComparison.InvariantCultureIgnoreCase));
             }
         }
 
@@ -45,7 +46,7 @@ namespace DapperExtensions.Test.Sql
                 Assert.AreEqual(']', Dialect.CloseQuote);
                 Assert.AreEqual(";" + Environment.NewLine, Dialect.BatchSeperator);
                 Assert.AreEqual('@', Dialect.ParameterPrefix);
-                Assert.IsTrue(Dialect.SupportsMultipleStatements);
+                Assert.That(Dialect.SupportsMultipleStatements);
             }
         }
 

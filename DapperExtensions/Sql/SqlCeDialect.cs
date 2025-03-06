@@ -42,7 +42,6 @@ namespace DapperExtensions.Sql
 
             result.AppendFormat("{0}{1}", tableName, CloseQuote);
 
-
             if (!string.IsNullOrWhiteSpace(alias))
             {
                 result.AppendFormat(" AS {0}{1}{2}", OpenQuote, alias, CloseQuote);
@@ -51,7 +50,7 @@ namespace DapperExtensions.Sql
             return result.ToString();
         }
 
-        public override string GetIdentitySql(string tableName)
+        public override string GetIdentitySql(Type identityColumnType)
         {
             return "SELECT CAST(@@IDENTITY AS BIGINT) AS [Id]";
         }

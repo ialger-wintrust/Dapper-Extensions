@@ -11,9 +11,10 @@ namespace DapperExtensions.Sql
 {
     public class OracleDialect : SqlDialectBase
     {
-        public OracleDialect() { }
+        public OracleDialect()
+        { }
 
-        public override string GetIdentitySql(string tableName)
+        public override string GetIdentitySql(Type identityColumnType)
         {
             throw new NotImplementedException("Oracle does not support get last inserted identity.");
         }

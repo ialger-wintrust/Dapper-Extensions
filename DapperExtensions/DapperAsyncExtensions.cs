@@ -13,7 +13,7 @@ namespace DapperExtensions
 {
     public static class DapperAsyncExtensions
     {
-        private readonly static object _lock = new object();
+        private static readonly object _lock = new object();
         private static Func<IDapperExtensionsConfiguration, IDapperAsyncImplementor> _instanceFactory;
         private static IDapperAsyncImplementor _instance;
         private static IDapperExtensionsConfiguration _configuration;
@@ -100,7 +100,7 @@ namespace DapperExtensions
         }
 
         /// <summary>
-        /// Return property liste from (anonymous) type
+        /// Return property list from (anonymous) type
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
@@ -124,8 +124,6 @@ namespace DapperExtensions
 
                 return cols;
             }
-
-
         }
 
         /// <summary>
@@ -298,7 +296,6 @@ namespace DapperExtensions
             // Transform TIn object to Anonymous type
             Func<TIn, TOut> f = func.Compile();
             return list.Select(i => f.Invoke(i));
-
         }
 
         /// <summary>
