@@ -1,13 +1,14 @@
 ﻿using DapperExtensions.Predicate;
+using DapperExtensions.Sql.Dialects;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 
 namespace DapperExtensions.Sql
 {
-    public class SqlCeDialect : SqlDialectBase
+    public class SqlServerDialect : SqlDialectBase
     {
         public override char OpenQuote
         {
@@ -19,40 +20,29 @@ namespace DapperExtensions.Sql
             get { return ']'; }
         }
 
-        public override bool SupportsMultipleStatements
+        public override string GetIdentitySql(Type memberType)
         {
-            get { return false; }
-        }
+            string sqlType;
 
-        public override bool SupportsCountOfSubquery => false;
-
-        public override string GetTableName(string schemaName, string tableName, string alias)
-        {
-            if (string.IsNullOrWhiteSpace(tableName))
+            switch (memberType)
             {
-                throw new ArgumentNullException(nameof(tableName), $"{nameof(tableName)} cannot be null or empty.");
+                case var _ when memberType == typeof(short):
+                    sqlType = "SMALLINT";
+                    break;
+
+                case var _ when memberType == typeof(int):
+                    sqlType = "INT";
+                    break;
+
+                case var _ when memberType == typeof(long):
+                    sqlType = "BIGINT";
+                    break;
+
+                default:
+                    return string.Empty;
             }
 
-            var result = new StringBuilder();
-            result.Append(OpenQuote);
-            if (!string.IsNullOrWhiteSpace(schemaName))
-            {
-                result.AppendFormat("{0}_", schemaName);
-            }
-
-            result.AppendFormat("{0}{1}", tableName, CloseQuote);
-
-            if (!string.IsNullOrWhiteSpace(alias))
-            {
-                result.AppendFormat(" AS {0}{1}{2}", OpenQuote, alias, CloseQuote);
-            }
-
-            return result.ToString();
-        }
-
-        public override string GetIdentitySql(Type identityColumnType)
-        {
-            return "SELECT CAST(@@IDENTITY AS BIGINT) AS [Id]";
+            return $"SELECT CAST(SCOPE_IDENTITY() AS {sqlType}) AS [Id]";
         }
 
         public override string GetPagingSql(string sql, int page, int resultsPerPage, IDictionary<string, object> parameters, string partitionBy)
@@ -71,10 +61,34 @@ namespace DapperExtensions.Sql
             if (!IsSelectSql(sql))
                 throw new ArgumentException($"{nameof(sql)} must be a SELECT statement.", nameof(sql));
 
-            var result = string.Format("{0} OFFSET @firstResult ROWS FETCH NEXT @maxResults ROWS ONLY", sql);
-            parameters.Add("@firstResult", firstResult);
+            if (string.IsNullOrEmpty(GetOrderByClause(sql)))
+                sql = $"{sql} ORDER BY CURRENT_TIMESTAMP";
+
+            var result = $"{sql} OFFSET (@skipRows) ROWS FETCH NEXT @maxResults ROWS ONLY";
+
+            parameters.Add("@skipRows", firstResult);
             parameters.Add("@maxResults", maxResults);
+
             return result;
+        }
+
+        protected static string GetOrderByClause(string sql)
+        {
+            var orderByIndex = sql.LastIndexOf(" ORDER BY ", StringComparison.InvariantCultureIgnoreCase);
+            if (orderByIndex == -1)
+            {
+                return null;
+            }
+
+            var result = sql.Substring(orderByIndex).Trim();
+
+            var whereIndex = result.IndexOf(" WHERE ", StringComparison.InvariantCultureIgnoreCase);
+            if (whereIndex == -1)
+            {
+                return result;
+            }
+
+            return result.Substring(0, whereIndex).Trim();
         }
 
         public override string GetDatabaseFunctionString(DatabaseFunction databaseFunction, string columnName, string functionParameters = "")

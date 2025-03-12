@@ -3,25 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
 
-namespace DapperExtensions.Sql
+namespace DapperExtensions.Sql.Dialects
 {
-    public class MySqlDialect : SqlDialectBase
+    public class PostgreSqlDialect : SqlDialectBase
     {
-        public override char OpenQuote
-        {
-            get { return '`'; }
-        }
-
-        public override char CloseQuote
-        {
-            get { return '`'; }
-        }
-
         public override string GetIdentitySql(Type identityColumnType)
         {
-            return "SELECT CONVERT(LAST_INSERT_ID(), SIGNED INTEGER) AS ID";
+            return "SELECT LASTVAL() AS Id";
         }
 
         public override string GetPagingSql(string sql, int page, int resultsPerPage, IDictionary<string, object> parameters, string partitionBy)
@@ -40,17 +29,27 @@ namespace DapperExtensions.Sql
             if (!IsSelectSql(sql))
                 throw new ArgumentException($"{nameof(sql)} must be a SELECT statement.", nameof(sql));
 
-            var result = string.Format("{0} LIMIT @maxResults OFFSET @firstResult", sql);
-            parameters.Add("@firstResult", firstResult);
+            var result = string.Format("{0} LIMIT @maxResults OFFSET @pageStartRowNbr", sql);
             parameters.Add("@maxResults", maxResults);
+            parameters.Add("@pageStartRowNbr", firstResult);
             return result;
+        }
+
+        public override string GetColumnName(string prefix, string columnName, string alias)
+        {
+            return base.GetColumnName(prefix, columnName, alias).ToLower();
+        }
+
+        public override string GetTableName(string schemaName, string tableName, string alias)
+        {
+            return base.GetTableName(schemaName, tableName, alias).ToLower();
         }
 
         public override string GetDatabaseFunctionString(DatabaseFunction databaseFunction, string columnName, string functionParameters = "")
         {
             return databaseFunction switch
             {
-                DatabaseFunction.NullValue => $"IsNull({columnName}, {functionParameters})",
+                DatabaseFunction.NullValue => $"coalesce({columnName}, {functionParameters})",
                 DatabaseFunction.Truncate => $"Truncate({columnName})",
                 _ => columnName,
             };
@@ -59,20 +58,6 @@ namespace DapperExtensions.Sql
         [ExcludeFromCodeCoverage]
         public override void EnableCaseInsensitive(IDbConnection connection)
         {
-        }
-
-        public override string GetCountSql(string sql)
-        {
-            var countSQL = base.GetCountSql(sql);
-
-            var count = Regex.Matches(sql.ToUpperInvariant(), "SELECT").Count;
-
-            if (count > 1)
-            {
-                return $"{countSQL} AS {OpenQuote}Total{CloseQuote}";
-            }
-
-            return countSQL;
         }
     }
 }

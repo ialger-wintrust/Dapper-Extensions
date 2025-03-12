@@ -2,46 +2,26 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 
-namespace DapperExtensions.Sql
+namespace DapperExtensions.Sql.Dialects
 {
-    public class SqlServerDialect : SqlDialectBase
+    public class MySqlDialect : SqlDialectBase
     {
         public override char OpenQuote
         {
-            get { return '['; }
+            get { return '`'; }
         }
 
         public override char CloseQuote
         {
-            get { return ']'; }
+            get { return '`'; }
         }
 
-        public override string GetIdentitySql(Type memberType)
+        public override string GetIdentitySql(Type identityColumnType)
         {
-            string sqlType;
-
-            switch (memberType)
-            {
-                case var _ when memberType == typeof(short):
-                    sqlType = "SMALLINT";
-                    break;
-
-                case var _ when memberType == typeof(int):
-                    sqlType = "INT";
-                    break;
-
-                case var _ when memberType == typeof(long):
-                    sqlType = "BIGINT";
-                    break;
-
-                default:
-                    return string.Empty;
-            }
-
-            return $"SELECT CAST(SCOPE_IDENTITY() AS {sqlType}) AS [Id]";
+            return "SELECT CONVERT(LAST_INSERT_ID(), SIGNED INTEGER) AS ID";
         }
 
         public override string GetPagingSql(string sql, int page, int resultsPerPage, IDictionary<string, object> parameters, string partitionBy)
@@ -60,34 +40,10 @@ namespace DapperExtensions.Sql
             if (!IsSelectSql(sql))
                 throw new ArgumentException($"{nameof(sql)} must be a SELECT statement.", nameof(sql));
 
-            if (string.IsNullOrEmpty(GetOrderByClause(sql)))
-                sql = $"{sql} ORDER BY CURRENT_TIMESTAMP";
-
-            var result = $"{sql} OFFSET (@skipRows) ROWS FETCH NEXT @maxResults ROWS ONLY";
-
-            parameters.Add("@skipRows", firstResult);
+            var result = string.Format("{0} LIMIT @maxResults OFFSET @firstResult", sql);
+            parameters.Add("@firstResult", firstResult);
             parameters.Add("@maxResults", maxResults);
-
             return result;
-        }
-
-        protected static string GetOrderByClause(string sql)
-        {
-            var orderByIndex = sql.LastIndexOf(" ORDER BY ", StringComparison.InvariantCultureIgnoreCase);
-            if (orderByIndex == -1)
-            {
-                return null;
-            }
-
-            var result = sql.Substring(orderByIndex).Trim();
-
-            var whereIndex = result.IndexOf(" WHERE ", StringComparison.InvariantCultureIgnoreCase);
-            if (whereIndex == -1)
-            {
-                return result;
-            }
-
-            return result.Substring(0, whereIndex).Trim();
         }
 
         public override string GetDatabaseFunctionString(DatabaseFunction databaseFunction, string columnName, string functionParameters = "")
@@ -103,6 +59,20 @@ namespace DapperExtensions.Sql
         [ExcludeFromCodeCoverage]
         public override void EnableCaseInsensitive(IDbConnection connection)
         {
+        }
+
+        public override string GetCountSql(string sql)
+        {
+            var countSQL = base.GetCountSql(sql);
+
+            var count = Regex.Matches(sql.ToUpperInvariant(), "SELECT").Count;
+
+            if (count > 1)
+            {
+                return $"{countSQL} AS {OpenQuote}Total{CloseQuote}";
+            }
+
+            return countSQL;
         }
     }
 }

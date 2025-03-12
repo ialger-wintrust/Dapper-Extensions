@@ -1,6 +1,7 @@
 ﻿using DapperExtensions.Mapper;
 using DapperExtensions.Predicate;
 using DapperExtensions.Sql;
+using DapperExtensions.Sql.Dialects;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

@@ -1,6 +1,7 @@
 ﻿using DapperExtensions.Mapper;
 using DapperExtensions.Predicate;
 using DapperExtensions.Sql;
+using DapperExtensions.Sql.Dialects;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -344,7 +345,7 @@ namespace DapperExtensions
         }
 
         /// <summary>
-        /// Gets the last SQL command executed by the Dapper Extensions Implementation
+        /// Clears the class maps that were initialzied
         /// </summary>
         public static void ClearCache()
         {

@@ -5,7 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 
-namespace DapperExtensions.Sql
+namespace DapperExtensions.Sql.Dialects
 {
     public interface ISqlDialect
     {
@@ -126,7 +126,7 @@ namespace DapperExtensions.Sql
 
         protected virtual int GetStartValue(int page, int resultsPerPage)
         {
-            return (((page == 0 ? 1 : page) - 1) * resultsPerPage);
+            return ((page == 0 ? 1 : page) - 1) * resultsPerPage;
         }
 
         public abstract string GetIdentitySql(Type identityType);

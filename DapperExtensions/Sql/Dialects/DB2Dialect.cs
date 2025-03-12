@@ -6,7 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 
-namespace DapperExtensions.Sql
+namespace DapperExtensions.Sql.Dialects
 {
     public class DB2Dialect : SqlDialectBase
     {
@@ -17,7 +17,7 @@ namespace DapperExtensions.Sql
 
         public override string GetPagingSql(string sql, int page, int resultsPerPage, IDictionary<string, object> parameters, string partitionBy)
         {
-            return GetSetSql(sql, GetStartValue(page, resultsPerPage) + 1, (page * resultsPerPage), parameters);
+            return GetSetSql(sql, GetStartValue(page, resultsPerPage) + 1, page * resultsPerPage, parameters);
         }
 
         public override string GetSetSql(string sql, int firstResult, int maxResults, IDictionary<string, object> parameters)

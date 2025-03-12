@@ -24,7 +24,7 @@ public class SqlServerCrudUnitTests
     }
 
     [Fact]
-    public async Task TestIntIdAdd()
+    public void TestIntIdAdd()
     {
         var testContact = new CampaignLead()
         {
@@ -38,7 +38,7 @@ public class SqlServerCrudUnitTests
 
         using (var connection = GetConnection())
         {
-            var results = await connection.InsertAsync(testContact);
+            var results = connection.Insert(testContact);
             int id = results;
             connection.Close();
         }

@@ -1,4 +1,5 @@
 ﻿using DapperExtensions.Predicate;
+using DapperExtensions.Sql.Dialects;
 using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Collections.Generic;
