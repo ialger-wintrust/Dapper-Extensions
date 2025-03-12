@@ -1,5 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using System.Data;
+using DapperExtensions.xUnitTest.DbModels;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
@@ -26,6 +26,8 @@ public class SqlServerCrudUnitTests
     [Fact]
     public void TestIntIdAdd()
     {
+        var expectedDefaultInt = 0;
+
         var testContact = new CampaignLead()
         {
             ActiniumId = 1233432434,
@@ -36,73 +38,32 @@ public class SqlServerCrudUnitTests
             ContactAttempt = 1,
         };
 
-        using (var connection = GetConnection())
-        {
-            var results = connection.Insert(testContact);
-            int id = results;
-            connection.Close();
-        }
+        using var connection = GetConnection();
+        var results = connection.Insert(testContact);
+        int id = results;
 
-        Console.Write("Finished");
+        Assert.NotNull(results);
+        Assert.NotEqual(expectedDefaultInt, id);
+        Assert.IsType<int>(id);
     }
 
     [Fact]
     public async Task TestGuidIdAdd()
     {
+        var expectedDefaultGuid = new Guid();
+
         var testContact = new UserGuid()
         {
             Username = "testUser"
         };
-        try
-        {
-            using var connection = GetConnection();
-            var results = await connection.InsertAsync(testContact);
 
-            Guid id = results;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
+        using var connection = GetConnection();
+        var results = await connection.InsertAsync(testContact);
+
+        Guid id = results;
+
+        Assert.NotNull(results);
+        Assert.NotEqual(expectedDefaultGuid, id);
+        Assert.IsType<Guid>(id);
     }
-
-    //[Fact]
-    //public void TestWorks()
-    //{
-    //    Assert.True(true);
-    //}
-}
-
-public class CampaignLead
-{
-    [Key]
-    public int Id { get; set; }
-
-    public int ActiniumId { get; set; }
-
-    [Required]
-    [StringLength(11)]
-    public string PhoneNumber { get; set; }
-
-    [StringLength(11)]
-    public string OutboundAni { get; set; }
-
-    [Required]
-    [StringLength(50)]
-    public string CampaignName { get; set; }
-
-    [StringLength(255)]
-    public string CampaignSource { get; set; }
-
-    public byte? ContactAttempt { get; set; }
-}
-
-public class UserGuid
-{
-    [Key]
-    public Guid Id { get; set; }
-
-    [Required]
-    [StringLength(50)]
-    public string Username { get; set; }
 }
