@@ -24,7 +24,7 @@ public class SqlServerCrudUnitTests
     }
 
     [Fact]
-    public void TestIntIdAdd()
+    public void InsertingARecordWithAIdentityKey_ShouldReturnAValidEntityType()
     {
         var expectedDefaultInt = 0;
 
@@ -48,7 +48,7 @@ public class SqlServerCrudUnitTests
     }
 
     [Fact]
-    public async Task TestGuidIdAdd()
+    public async Task InsertingARecordWithANonIdentityKey_ShouldReturnAValidEntityType()
     {
         var expectedDefaultGuid = new Guid();
 
