@@ -728,7 +728,7 @@ namespace DapperExtensions
                     keyValue = InsertIdentity(connection, transaction, commandTimeout, sql, identityColumn, dynamicParameters);
                 }
 
-                var expectedValue = Convert.ChangeType(keyValue, keyColumn.MemberType);
+                //var expectedValue = Convert.ChangeType(keyValue, keyColumn.MemberType);
 
                 keyValues.Add(keyColumn.Name, keyValue);
                 try
