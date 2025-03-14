@@ -11,6 +11,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using Microsoft.Data.SqlClient;
 using AutoMapper = Slapper.AutoMapper;
 
 namespace DapperExtensions
@@ -20,7 +21,7 @@ namespace DapperExtensions
         ISqlGenerator SqlGenerator { get; }
         string LastExecutedCommand { get; }
 
-        T Get<T>(IDbConnection connection, dynamic id, IDbTransaction transaction, int? commandTimeout, IList<IReferenceMap> includedProperties = null);
+        T? Get<T>(IDbConnection connection, dynamic id, IDbTransaction transaction, int? commandTimeout, IList<IReferenceMap> includedProperties = null);
 
         TOut GetPartial<TIn, TOut>(IDbConnection connection, Expression<Func<TIn, TOut>> func, dynamic id, IDbTransaction transaction, int? commandTimeout, IList<IReferenceMap> includedProperties = null) where TIn : class where TOut : class;
 
@@ -79,10 +80,40 @@ namespace DapperExtensions
         public ISqlGenerator SqlGenerator { get; }
         public string LastExecutedCommand { get; protected set; }
 
-        public T Get<T>(IDbConnection connection, dynamic id, IDbTransaction transaction, int? commandTimeout, IList<IReferenceMap> includedProperties = null)
+        public T? Get<T>(IDbConnection connection, object id, IDbTransaction? transaction, int? commandTimeout, IList<IReferenceMap>? includedProperties = null)
         {
-            return (T)InternalGet<T>(connection, id, transaction, commandTimeout, null, includedProperties);
+            var classMap = SqlGenerator.Configuration.GetMap<T>();
+            var predicate = GetIdPredicate(classMap, id);
+
+            var parameters = new Dictionary<string, object>(); 
+            var sql = SqlGenerator.Select(classMap, predicate, null, parameters, null, includedProperties);
+            var dynamicParameters = GetDynamicParameters(parameters);
+
+            LastExecutedCommand = sql;
+            var results = connection.QuerySingleOrDefault(sql, dynamicParameters, transaction, commandTimeout, CommandType.Text);
+
+            return MapColumns<T>(results);
         }
+
+        protected T InternalGet<T>(IDbConnection connection, dynamic id, IDbTransaction? transaction, int? commandTimeout, IList<IProjection>? colsToSelect, IList<IReferenceMap>? includedProperties = null)
+        {
+            IList<ISort>? sort = null;
+            var result = (IEnumerable<T>)InternalGetListAutoMap<T>(connection, id, sort, transaction, commandTimeout, true, colsToSelect, includedProperties);
+            return result.SingleOrDefault();
+        }
+
+        protected IEnumerable<T> InternalGetListAutoMap<T>(IDbConnection connection, object predicate, IList<ISort>? sort, IDbTransaction? transaction, int? commandTimeout, bool buffered, IList<IProjection> colsToSelect, IList<IReferenceMap> includedProperties = null)
+        {
+            GetMapAndPredicate<T>(predicate, out var classMap, out var wherePredicate);
+            return GetListAutoMap<T>(connection, colsToSelect, classMap, wherePredicate, sort, transaction, commandTimeout, buffered, includedProperties);
+        }
+
+        protected IEnumerable<T> InternalGetPageAutoMap<T>(IDbConnection connection, object predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction, int? commandTimeout, bool buffered, IList<IProjection> colsToSelect, IList<IReferenceMap> includedProperties = null)
+        {
+            GetMapAndPredicate<T>(predicate, out var classMap, out var wherePredicate);
+            return GetPageAutoMap<T>(connection, classMap, wherePredicate, sort, page, resultsPerPage, transaction, commandTimeout, buffered, colsToSelect, includedProperties);
+        }
+
 
         public TOut GetPartial<TIn, TOut>(IDbConnection connection, Expression<Func<TIn, TOut>> func, dynamic id, IDbTransaction transaction, int? commandTimeout, IList<IReferenceMap> includedProperties = null) where TIn : class where TOut : class
         {
@@ -239,6 +270,7 @@ namespace DapperExtensions
 
             var dynamicParameters = GetDynamicParameters(parameters);
             LastExecutedCommand = sql;
+
             return (int)connection.Query(sql, dynamicParameters, transaction, false, commandTimeout, CommandType.Text).Single().Total;
         }
 
@@ -266,7 +298,7 @@ namespace DapperExtensions
             LastExecutedCommand = sql;
             var query = connection.Query<dynamic>(sql, dynamicParameters, transaction, buffered, commandTimeout, CommandType.Text);
 
-            return MappColumns<T>(query);
+            return MapColumns<T>(query);
         }
 
         protected IEnumerable<T> GetPageAutoMap<T>(IDbConnection connection, IClassMapper classMap, IPredicate predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction, int? commandTimeout, bool buffered, IList<IProjection> colsToSelect, IList<IReferenceMap> includedProperties = null)
@@ -278,7 +310,7 @@ namespace DapperExtensions
             LastExecutedCommand = sql;
             var query = connection.Query<dynamic>(sql, dynamicParameters, transaction, buffered, commandTimeout, CommandType.Text);
 
-            return MappColumns<T>(query);
+            return MapColumns<T>(query);
         }
 
         protected IEnumerable<T> GetPage<T>(IDbConnection connection, IClassMapper classMap, IPredicate predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction, int? commandTimeout, bool buffered, IList<IProjection> colsToSelect, IList<IReferenceMap> includedProperties = null)
@@ -467,9 +499,9 @@ namespace DapperExtensions
 
         protected string GetColumnAliasFromSimpleAlias(string simpleAlias)
         {
-            if (SqlGenerator.AllColumns.Any(c => c.SimpleAlias.Equals(simpleAlias, StringComparison.InvariantCultureIgnoreCase)))
-                return SqlGenerator.AllColumns.Where(c => c.SimpleAlias.Equals(simpleAlias, StringComparison.InvariantCultureIgnoreCase)).Select(c => c.Alias).Single();
-            return "";
+            return SqlGenerator.AllColumns.Any(c => c.SimpleAlias.Equals(simpleAlias, StringComparison.InvariantCultureIgnoreCase)) 
+                ? SqlGenerator.AllColumns.Where(c => c.SimpleAlias.Equals(simpleAlias, StringComparison.InvariantCultureIgnoreCase)).Select(c => c.Alias).Single() 
+                : string.Empty;
         }
 
         protected string GetSimpleAliasFromColumnAlias(string columnAlias)
@@ -479,18 +511,22 @@ namespace DapperExtensions
             return "";
         }
 
-        protected IEnumerable<T> MappColumns<T>(IEnumerable<dynamic> values)
+
+        protected T MapColumns<T>(dynamic value)
+        {
+            var columnDictionary = PopulateDynamicDictionary(value);
+
+            SetAutoMapperIdentifier(SqlGenerator.MappedTables);
+
+            return AutoMapper.Map<T>(columnDictionary, false);
+        }
+
+        protected IEnumerable<T> MapColumns<T>(IEnumerable<dynamic> values)
         {
             var list = new List<Dictionary<string, object>>();
             foreach (var d in values.ToList())
             {
-                var dictionary = new Dictionary<string, object>();
-                foreach (KeyValuePair<string, object> kvp in d)
-                {
-                    var alias = GetColumnAliasFromSimpleAlias(kvp.Key);
-                    if (!string.IsNullOrEmpty(alias))
-                        dictionary.Add(alias, kvp.Value);
-                }
+                Dictionary<string, object> dictionary = PopulateDynamicDictionary(d);
 
                 list.Add(dictionary);
             }
@@ -498,6 +534,19 @@ namespace DapperExtensions
             SetAutoMapperIdentifier(SqlGenerator.MappedTables);
 
             return AutoMapper.Map<T>(list, false);
+        }
+
+        private Dictionary<string, object> PopulateDynamicDictionary(dynamic d)
+        {
+            var dictionary = new Dictionary<string, object>();
+            foreach (KeyValuePair<string, object> kvp in d)
+            {
+                var alias = GetColumnAliasFromSimpleAlias(kvp.Key);
+                if (!string.IsNullOrEmpty(alias))
+                    dictionary.Add(alias, kvp.Value);
+            }
+
+            return dictionary;
         }
 
         protected static DynamicParameters GetDynamicParameters(Dictionary<string, object> parameters)
@@ -645,9 +694,10 @@ namespace DapperExtensions
                 sql = identitySql;
             }
 
+            LastExecutedCommand = sql;
             var result = connection.Query<dynamic>(sql, dynamicParameters, transaction, false, commandTimeout, CommandType.Text);
 
-            LastExecutedCommand = sql;
+
 
             // We are only interested in the first identity, but we are iterating over all resulting items (if any).
             // This makes sure that ADO.NET drivers (like MySql) won't actively terminate the query.
@@ -799,23 +849,6 @@ namespace DapperExtensions
                 InternalUpdate(connection, e, classMap, predicate, transaction, cols, commandTimeout, ignoreAllKeyProperties);
         }
 
-        protected T InternalGet<T>(IDbConnection connection, dynamic id, IDbTransaction transaction, int? commandTimeout, IList<IProjection> colsToSelect, IList<IReferenceMap> includedProperties = null)
-        {
-            var result = (IEnumerable<T>)InternalGetListAutoMap<T>(connection, id, null, transaction, commandTimeout, true, colsToSelect, includedProperties);
-            return result.SingleOrDefault();
-        }
-
-        protected IEnumerable<T> InternalGetListAutoMap<T>(IDbConnection connection, object predicate, IList<ISort> sort, IDbTransaction transaction, int? commandTimeout, bool buffered, IList<IProjection> colsToSelect, IList<IReferenceMap> includedProperties = null)
-        {
-            GetMapAndPredicate<T>(predicate, out var classMap, out var wherePredicate);
-            return GetListAutoMap<T>(connection, colsToSelect, classMap, wherePredicate, sort, transaction, commandTimeout, buffered, includedProperties);
-        }
-
-        protected IEnumerable<T> InternalGetPageAutoMap<T>(IDbConnection connection, object predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction, int? commandTimeout, bool buffered, IList<IProjection> colsToSelect, IList<IReferenceMap> includedProperties = null)
-        {
-            GetMapAndPredicate<T>(predicate, out var classMap, out var wherePredicate);
-            return GetPageAutoMap<T>(connection, classMap, wherePredicate, sort, page, resultsPerPage, transaction, commandTimeout, buffered, colsToSelect, includedProperties);
-        }
 
         protected IEnumerable<T> InternalGetSet<T>(IDbConnection connection, object predicate, IList<ISort> sort, int firstResult, int maxResults, IDbTransaction transaction, int? commandTimeout, bool buffered, IList<IProjection> colsToSelect, IList<IReferenceMap> includedProperties = null)
         {
@@ -833,7 +866,9 @@ namespace DapperExtensions
         protected virtual void GetMapAndPredicate<T>(object predicateValue, out IClassMapper classMapper, out IPredicate wherePredicate, bool keyPredicate = false)
         {
             classMapper = SqlGenerator.Configuration.GetMap<T>();
-            wherePredicate = keyPredicate ? GetKeyPredicate(classMapper, predicateValue) : GetPredicate(classMapper, predicateValue);
+            wherePredicate = keyPredicate 
+                ? GetKeyPredicate(classMapper, predicateValue) 
+                : GetPredicate(classMapper, predicateValue);
         }
     }
 }

@@ -4,7 +4,7 @@
 		<TargetFrameworks>net8.0</TargetFrameworks>
 		<Version>1.7.1</Version>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<LangVersion>8.0</LangVersion>
+		<LangVersion>9.0</LangVersion>
 	</PropertyGroup>
 	
 	<PropertyGroup>
@@ -36,6 +36,7 @@
 		<PackageTags>orm sql micro-orm Data Dapper</PackageTags>
 		<NeutralLanguage></NeutralLanguage>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="$(TargetFramework.StartsWith('net4')) and '$(OS)' == 'Unix'">

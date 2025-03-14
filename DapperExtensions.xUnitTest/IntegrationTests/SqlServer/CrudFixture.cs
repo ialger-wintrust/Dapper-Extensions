@@ -58,19 +58,32 @@ public static class CrudFixture
         [Fact]
         public void UsingKey_ReturnsEntity()
         {
-            var p1 = new Person
+            var testP1 = new Person
             {
                 Active = true,
                 FirstName = "Foo",
                 LastName = "Bar",
                 DateCreated = DateTime.UtcNow
             };
-            var id = Db.Insert(p1);
+            var testP2 = new Person
+            {
+                Active = true,
+                FirstName = "Foo2",
+                LastName = "Bar2",
+                DateCreated = DateTime.UtcNow
+            };
+            var id1 = Db.Insert(testP1);
+            var id2 = Db.Insert(testP2);
 
-            Person p2 = Db.Get<Person>(id);
-            Assert.Equal(id, p2.Id);
-            Assert.Equal("Foo", p2.FirstName);
-            Assert.Equal("Bar", p2.LastName);
+            Person actualP1 = Db.Get<Person>(id1);
+            Assert.Equal(id1, actualP1.Id);
+            Assert.Equal("Foo", actualP1.FirstName);
+            Assert.Equal("Bar", actualP1.LastName);
+
+            Person actualP2 = Db.Get<Person>(id2);
+            Assert.Equal(id2, actualP2.Id);
+            Assert.Equal("Foo2", actualP2.FirstName);
+            Assert.Equal("Bar2", actualP2.LastName);
         }
 
         [Fact]
