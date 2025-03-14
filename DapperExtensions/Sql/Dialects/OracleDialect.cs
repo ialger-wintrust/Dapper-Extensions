@@ -1,14 +1,12 @@
-﻿using DapperExtensions.Predicate;
-using DapperExtensions.Sql.Dialects;
-using Oracle.ManagedDataAccess.Client;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
+using DapperExtensions.Predicate;
+using Oracle.ManagedDataAccess.Client;
 
-namespace DapperExtensions.Sql
+namespace DapperExtensions.Sql.Dialects
 {
     public class OracleDialect : SqlDialectBase
     {

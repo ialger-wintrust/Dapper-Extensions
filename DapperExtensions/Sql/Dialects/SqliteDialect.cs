@@ -1,12 +1,10 @@
-﻿using DapperExtensions.Predicate;
-using DapperExtensions.Sql.Dialects;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
+using DapperExtensions.Predicate;
 
-namespace DapperExtensions.Sql
+namespace DapperExtensions.Sql.Dialects
 {
     public class SqliteDialect : SqlDialectBase
     {

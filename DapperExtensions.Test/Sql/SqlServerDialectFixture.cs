@@ -5,6 +5,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using DapperExtensions.Sql.Dialects;
 using NUnit.Framework.Legacy;
 
 namespace DapperExtensions.Test.Sql

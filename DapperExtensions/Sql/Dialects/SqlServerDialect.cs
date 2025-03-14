@@ -1,12 +1,10 @@
-﻿using DapperExtensions.Predicate;
-using DapperExtensions.Sql.Dialects;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using DapperExtensions.Predicate;
 
-namespace DapperExtensions.Sql
+namespace DapperExtensions.Sql.Dialects
 {
     public class SqlServerDialect : SqlDialectBase
     {
@@ -35,11 +33,9 @@ namespace DapperExtensions.Sql
                     break;
 
                 case var _ when memberType == typeof(long):
+                default:
                     sqlType = "BIGINT";
                     break;
-
-                default:
-                    return string.Empty;
             }
 
             return $"SELECT CAST(SCOPE_IDENTITY() AS {sqlType}) AS [Id]";

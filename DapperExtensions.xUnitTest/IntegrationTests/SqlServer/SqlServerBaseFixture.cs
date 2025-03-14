@@ -1,14 +1,17 @@
-﻿using DapperExtensions.Sql;
-using NUnit.Framework;
-using System.Data.SqlClient;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+using DapperExtensions.Sql;
 using DapperExtensions.Sql.Dialects;
+using Microsoft.Data.SqlClient;
 
-namespace DapperExtensions.Test.IntegrationTests.Async.SqlServer
+namespace DapperExtensions.xUnitTest.IntegrationTests.SqlServer
 {
-    [NonParallelizable]
-    public class SqlServerBaseAsyncFixture : DatabaseAsyncTestsFixture
+    public class SqlServerBaseFixture : DatabaseTestsFixture
     {
+        public SqlServerBaseFixture()
+        {
+            Setup();
+        }
+
         [ExcludeFromCodeCoverage]
         private SqlConnection SetupDatabase()
         {
@@ -21,8 +24,7 @@ namespace DapperExtensions.Test.IntegrationTests.Async.SqlServer
             return new SqlConnection(ConnectionString("SqlServer"));
         }
 
-        [SetUp]
-        public virtual void Setup()
+        public void Setup()
         {
             var connection = new SqlConnection(ConnectionString("SqlServer"));
 

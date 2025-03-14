@@ -4,6 +4,7 @@ using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using DapperExtensions.Sql.Dialects;
 
 namespace DapperExtensions.Test.IntegrationTests.Oracle
 {
@@ -40,7 +41,7 @@ namespace DapperExtensions.Test.IntegrationTests.Oracle
                 }
                 else
                     throw;
-            }            
+            }
 
             ExecuteScripts(connection, true, CreateTableScripts.Where(s => s.IndexOf("foo", StringComparison.InvariantCultureIgnoreCase) < 0).ToArray());
         }

@@ -3,6 +3,7 @@ using DapperExtensions.Sql;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using DapperExtensions.Sql.Dialects;
 
 namespace DapperExtensions.Test.Sql
 {

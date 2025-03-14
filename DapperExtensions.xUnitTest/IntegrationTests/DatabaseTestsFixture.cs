@@ -1,20 +1,14 @@
-﻿using Dapper;
+﻿using System.Data;
+using System.Data.Common;
+using System.Reflection;
+using Dapper;
 using DapperExtensions.Mapper;
 using DapperExtensions.Sql;
-using Newtonsoft.Json;
-using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.Common;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 using DapperExtensions.Sql.Dialects;
+using Newtonsoft.Json;
 
-namespace DapperExtensions.Test.IntegrationTests
+namespace DapperExtensions.xUnitTest.IntegrationTests
 {
-    [NonParallelizable]
     public abstract class DatabaseTestsFixture : IDisposable
     {
         private readonly Dictionary<string, string> _connectionStrings = new Dictionary<string, string>();
@@ -127,7 +121,7 @@ namespace DapperExtensions.Test.IntegrationTests
 
         private static string ReadFile(string fileName)
         {
-            using StreamReader sr = new StreamReader(fileName);
+            using var sr = new StreamReader(fileName);
             return sr.ReadToEnd();
         }
 

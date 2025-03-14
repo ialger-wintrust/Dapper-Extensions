@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using System.Data.SqlClient;
 using System.Diagnostics.CodeAnalysis;
+using DapperExtensions.Sql.Dialects;
 
 namespace DapperExtensions.Test.IntegrationTests.SqlServer
 {

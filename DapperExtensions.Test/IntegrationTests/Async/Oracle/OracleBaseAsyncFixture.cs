@@ -3,6 +3,7 @@ using NUnit.Framework;
 using Oracle.ManagedDataAccess.Client;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using DapperExtensions.Sql.Dialects;
 
 namespace DapperExtensions.Test.IntegrationTests.Async.Oracle
 {

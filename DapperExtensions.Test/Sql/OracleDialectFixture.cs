@@ -6,6 +6,7 @@ using NUnit.Framework;
 using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Collections.Generic;
+using DapperExtensions.Sql.Dialects;
 
 namespace DapperExtensions.Test.Sql
 {
@@ -129,10 +130,10 @@ namespace DapperExtensions.Test.Sql
                 var parameters = new Dictionary<string, object>();
                 const string sql = @"SELECT * FROM (
 SELECT ss_dapper_1.*, liner.LINE_NUMBER FROM (
-SELECT ""COLUMN"" FROM ""SCHEMA"".""TABLE"") ss_dapper_1 
+SELECT ""COLUMN"" FROM ""SCHEMA"".""TABLE"") ss_dapper_1
 inner join (select ""COLUMN"", ROW_NUMBER() OVER (ORDER BY ""COLUMN"" ASC) LINE_NUMBER from (
 select distinct ""COLUMN"" from (SELECT ""COLUMN"" FROM ""SCHEMA"".""TABLE""))) liner on liner.""COLUMN"" = ss_dapper_1.""COLUMN""
-) ss_dapper_2 
+) ss_dapper_2
 WHERE ss_dapper_2.line_number > :toSkip AND ss_dapper_2.line_number <= :topLimit
 ";
                 var result = Dialect.GetPagingSql("SELECT \"COLUMN\" FROM \"SCHEMA\".\"TABLE\"", 1, 10, parameters, "\"COLUMN\"");
@@ -148,10 +149,10 @@ WHERE ss_dapper_2.line_number > :toSkip AND ss_dapper_2.line_number <= :topLimit
                 var parameters = new Dictionary<string, object>();
                 const string sql = @"SELECT * FROM (
 SELECT ss_dapper_1.*, liner.LINE_NUMBER FROM (
-SELECT DISTINCT ""COLUMN"" FROM ""SCHEMA"".""TABLE"") ss_dapper_1 
+SELECT DISTINCT ""COLUMN"" FROM ""SCHEMA"".""TABLE"") ss_dapper_1
 inner join (select ""COLUMN"", ROW_NUMBER() OVER (ORDER BY ""COLUMN"" ASC) LINE_NUMBER from (
 select distinct ""COLUMN"" from (SELECT DISTINCT ""COLUMN"" FROM ""SCHEMA"".""TABLE""))) liner on liner.""COLUMN"" = ss_dapper_1.""COLUMN""
-) ss_dapper_2 
+) ss_dapper_2
 WHERE ss_dapper_2.line_number > :toSkip AND ss_dapper_2.line_number <= :topLimit
 ";
                 var result = Dialect.GetPagingSql("SELECT DISTINCT \"COLUMN\" FROM \"SCHEMA\".\"TABLE\"", 1, 10, parameters, "\"COLUMN\"");
@@ -167,10 +168,10 @@ WHERE ss_dapper_2.line_number > :toSkip AND ss_dapper_2.line_number <= :topLimit
                 var parameters = new Dictionary<string, object>();
                 const string sql = @"SELECT * FROM (
 SELECT ss_dapper_1.*, liner.LINE_NUMBER FROM (
-SELECT ""COLUMN"" FROM ""SCHEMA"".""TABLE"" ORDER BY ""COLUMN"" DESC) ss_dapper_1 
+SELECT ""COLUMN"" FROM ""SCHEMA"".""TABLE"" ORDER BY ""COLUMN"" DESC) ss_dapper_1
 inner join (select ""COLUMN"", ROW_NUMBER() OVER (ORDER BY ""COLUMN"" ASC) LINE_NUMBER from (
 select distinct ""COLUMN"" from (SELECT ""COLUMN"" FROM ""SCHEMA"".""TABLE"" ORDER BY ""COLUMN"" DESC))) liner on liner.""COLUMN"" = ss_dapper_1.""COLUMN""
-) ss_dapper_2 
+) ss_dapper_2
 WHERE ss_dapper_2.line_number > :toSkip AND ss_dapper_2.line_number <= :topLimit
 ";
                 var result = Dialect.GetPagingSql("SELECT \"COLUMN\" FROM \"SCHEMA\".\"TABLE\" ORDER BY \"COLUMN\" DESC", 1, 10, parameters, "\"COLUMN\"");
@@ -186,10 +187,10 @@ WHERE ss_dapper_2.line_number > :toSkip AND ss_dapper_2.line_number <= :topLimit
                 var parameters = new Dictionary<string, object>();
                 const string sql = @"SELECT * FROM (
 SELECT ss_dapper_1.*, liner.LINE_NUMBER FROM (
-SELECT c1, c2, c3 FROM ""SCHEMA"".""TABLE"" ORDER BY c1, c2, c3 DESC) ss_dapper_1 
+SELECT c1, c2, c3 FROM ""SCHEMA"".""TABLE"" ORDER BY c1, c2, c3 DESC) ss_dapper_1
 inner join (select c1, c2, c3, ROW_NUMBER() OVER (ORDER BY c1, c2, c3 ASC) LINE_NUMBER from (
 select distinct c1, c2, c3 from (SELECT c1, c2, c3 FROM ""SCHEMA"".""TABLE"" ORDER BY c1, c2, c3 DESC))) liner on liner.c1 = ss_dapper_1.c1 and liner.c2 = ss_dapper_1.c2 and liner.c3 = ss_dapper_1.c3
-) ss_dapper_2 
+) ss_dapper_2
 WHERE ss_dapper_2.line_number > :toSkip AND ss_dapper_2.line_number <= :topLimit
 ";
                 var result = Dialect.GetPagingSql("SELECT c1, c2, c3 FROM \"SCHEMA\".\"TABLE\" ORDER BY c1, c2, c3 DESC", 1, 10, parameters, "c1, c2, c3");

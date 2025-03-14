@@ -1,6 +1,7 @@
 ﻿using DapperExtensions.Sql;
 using NUnit.Framework;
 using System.Data.SQLite;
+using DapperExtensions.Sql.Dialects;
 
 namespace DapperExtensions.Test.IntegrationTests.Sqlite
 {

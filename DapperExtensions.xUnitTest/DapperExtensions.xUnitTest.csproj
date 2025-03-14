@@ -1,37 +1,79 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
 
-    <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
-    <UserSecretsId>e8b76c95-e003-4e06-955a-a3a8ac4f6ac7</UserSecretsId>
-    <OutputType>Library</OutputType>
-  </PropertyGroup>
+		<IsPackable>false</IsPackable>
+		<IsTestProject>true</IsTestProject>
+		<UserSecretsId>e8b76c95-e003-4e06-955a-a3a8ac4f6ac7</UserSecretsId>
+		<OutputType>Library</OutputType>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="coverlet.collector" Version="6.0.4">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.2" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.2" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
-    <PackageReference Include="xunit" Version="2.9.3" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="3.0.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
+	<ItemGroup>
+		<None Remove="connectionstrings.json" />
+		<None Remove="DDL\SqlServer\CreateAnimalTable.sql" />
+		<None Remove="DDL\SqlServer\CreateFooTable.sql" />
+		<None Remove="DDL\SqlServer\CreateMultikeyTable.sql" />
+		<None Remove="DDL\SqlServer\CreatePersonTable.sql" />
+		<None Remove="DDL\SqlServer\Setup.sql" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\DapperExtensions\DapperExtensions.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<Content Include="connectionstrings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="DDL\SqlServer\CreateAnimalTable.sql">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="DDL\SqlServer\CreateMultikeyTable.sql">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="DDL\SqlServer\CreatePersonTable.sql">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="DDL\SqlServer\Setup.sql">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="DDL\SqlServer\CreateCarTable.sql">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="DDL\SqlServer\CreateFooTable.sql">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
 
-  <ItemGroup>
-    <Using Include="Xunit" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="coverlet.collector" Version="6.0.4">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.2" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.2" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+		<PackageReference Include="Moq" Version="4.20.72" />
+		<PackageReference Include="xunit" Version="2.9.3" />
+		<PackageReference Include="xunit.runner.visualstudio" Version="3.0.2">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Page Include="DDL\SqlServer\CreateCarTable.sql">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Page>
+		<Page Include="DDL\SqlServer\CreateFooTable.sql" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\DapperExtensions.Test.Maps\DapperExtensions.Test.Maps.csproj" />
+		<ProjectReference Include="..\DapperExtensions\DapperExtensions.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="Xunit" />
+	</ItemGroup>
 
 </Project>
