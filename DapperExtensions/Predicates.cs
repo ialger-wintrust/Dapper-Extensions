@@ -22,7 +22,7 @@ namespace DapperExtensions
         /// <param name="databaseFunction">Apply database function to field</param>
         /// <param name="databaseFunctionParameters">Parameters to the database function</param>
         /// <returns>An instance of IFieldPredicate.</returns>
-        public static IFieldPredicate Field<T>(Expression<Func<T, object>> expression, Operator op, object value, bool not = false, bool useColumPrefix = true,
+        public static IFieldPredicate? Field<T>(Expression<Func<T, object>> expression, Operator op, object value, bool not = false, bool useColumPrefix = true,
             DatabaseFunction databaseFunction = DatabaseFunction.None, string databaseFunctionParameters = "")
         {
             var propertyInfo = ReflectionHelper.GetProperty(expression) as PropertyInfo;
@@ -43,7 +43,7 @@ namespace DapperExtensions
         /// <param name="databaseFunction">Apply database function to field</param>
         /// <param name="databaseFunctionParameters">Parameters to the database function</param>
         /// <returns>An instance of IFieldPredicate.</returns>
-        public static IFieldPredicate Field<T>(string propertyName, Operator op, object value, bool not = false, bool useColumPrefix = true,
+        public static IFieldPredicate? Field<T>(string propertyName, Operator op, object value, bool not = false, bool useColumPrefix = true,
             DatabaseFunction databaseFunction = DatabaseFunction.None, string databaseFunctionParameters = "")
         {
             var properties = ReflectionHelper.GetNestedProperties<T>(propertyName, '.', out string propertyInfoName);

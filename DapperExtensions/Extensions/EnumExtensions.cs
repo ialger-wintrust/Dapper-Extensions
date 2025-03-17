@@ -6,7 +6,7 @@ namespace DapperExtensions.Extensions
 {
     public static class EnumExtensions
     {
-        public static string Description(this Enum value)
+        public static string? Description(this Enum value)
         {
             var memInfo = value.GetType().GetMember(value.ToString());
 

@@ -115,7 +115,7 @@ namespace DapperExtensions
             }
         }
 
-        public static IDictionary<string, Func<object>> GetObjectValues(object obj)
+        public static IDictionary<string, Func<object>> GetObjectValues(object? obj)
         {
             IDictionary<string, Func<object>> result = new Dictionary<string, Func<object>>();
             if (obj == null)
@@ -126,7 +126,7 @@ namespace DapperExtensions
             foreach (var propertyInfo in obj.GetType().GetProperties())
             {
                 if (propertyInfo.GetIndexParameters().Length > 0) continue;
-                string name = propertyInfo.Name;
+                var name = propertyInfo.Name;
                 object value() => propertyInfo.GetValue(obj, null);
                 result[name] = value;
             }
@@ -317,7 +317,7 @@ namespace DapperExtensions
 #endif
         }
 
-        public static Parameter GetParameter(Type entityType, ISqlGenerator sqlGenerator, string propertyName, object value)
+        public static Parameter GetParameter(Type entityType, ISqlGenerator sqlGenerator, string propertyName, object? value)
         {
             IClassMapper map = sqlGenerator.Configuration.GetMap(entityType);
             if (map == null)

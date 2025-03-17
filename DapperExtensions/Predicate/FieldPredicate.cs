@@ -11,14 +11,14 @@ namespace DapperExtensions.Predicate
 {
     public interface IFieldPredicate : IComparePredicate
     {
-        object Value { get; set; }
+        object? Value { get; set; }
         DatabaseFunction DatabaseFunction { get; set; }
         string DatabaseFunctionParameters { get; set; }
     }
 
     public class FieldPredicate<T> : ComparePredicate, IFieldPredicate
     {
-        public object Value { get; set; }
+        public object? Value { get; set; }
         public DatabaseFunction DatabaseFunction { get; set; }
         public string DatabaseFunctionParameters { get; set; }
         public IList<PropertyInfo> Properties { get; set; }
@@ -59,7 +59,7 @@ namespace DapperExtensions.Predicate
             return result;
         }
 
-        private string GetParameterName(ISqlGenerator sqlGenerator, IDictionary<string, object> parameters, object value)
+        private string GetParameterName(ISqlGenerator sqlGenerator, IDictionary<string, object> parameters, object? value)
         {
             var p = ReflectionHelper.GetParameter(typeof(T), sqlGenerator, PropertyName, value);
             return parameters.SetParameterName(p, sqlGenerator.Configuration.Dialect.ParameterPrefix);
@@ -85,14 +85,15 @@ namespace DapperExtensions.Predicate
         private string GetSql(ISqlGenerator sqlGenerator, IDictionary<string, object> parameters, string columnName, string parameterPropertyName, Type parentType)
         {
             if (Value == null)
-                return string.Format("({0} IS {1}NULL)", columnName, Not ? "NOT " : string.Empty);
+                return $"({columnName} IS {(Not ? "NOT " : string.Empty)}NULL)";
 
             if (Value is IEnumerable values && !(Value is string))
             {
-                if (Operator != Operator.Eq)
-                    throw new ArgumentException("Operator must be set to Eq for Enumerable types");
+                if (Operator != Operator.In)
+                    throw new ArgumentException("Operator must be set to In for Enumerable types");
 
-                return string.Format("({0} {1}IN ({2}))", columnName, Not ? "NOT " : string.Empty, GetParameterString(sqlGenerator, parameters, values));
+                return
+                    $"({columnName} {(Not ? "NOT " : string.Empty)}IN ({GetParameterString(sqlGenerator, parameters, values)}))";
             }
 
             var format = "({0} {1} {2})";

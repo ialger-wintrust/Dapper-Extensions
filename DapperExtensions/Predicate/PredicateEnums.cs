@@ -50,7 +50,12 @@
         /// <summary>
         /// Contains a value of an data object.
         /// </summary>
-        Contains
+        Contains,
+
+        /// <summary>
+        /// In a Sequence of values.
+        /// </summary>
+        In
     }
 
     /// <summary>

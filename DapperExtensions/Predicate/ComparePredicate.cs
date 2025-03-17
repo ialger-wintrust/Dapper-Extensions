@@ -12,7 +12,7 @@ namespace DapperExtensions.Predicate
     public abstract class ComparePredicate : BasePredicate
     {
         public Operator Operator { get; set; }
-        public bool Not { get; set; }
+        public bool Not { get; set; } = false;
         public bool UseTableAlias { get; set; }
 
         public virtual string GetOperatorString()

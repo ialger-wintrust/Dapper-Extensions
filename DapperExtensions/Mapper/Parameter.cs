@@ -6,7 +6,7 @@ namespace DapperExtensions.Mapper
     {
         public string Name { get; set; }
         public string ColumnName { get; set; }
-        public object Value { get; set; }
+        public object? Value { get; set; }
         public DbType? DbType { get; set; }
         public ParameterDirection? ParameterDirection { get; set; }
         public int? Size { get; set; }

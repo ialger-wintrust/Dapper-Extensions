@@ -212,7 +212,7 @@ namespace DapperExtensions
         /// Executes a select query using the specified predicate, returning an IEnumerable data typed as per T.
         /// Contains Slapper.Automaper
         /// </summary>
-        public static async Task<IEnumerable<T>> GetListAutoMapAsync<T>(this IDbConnection connection, object predicate = null, IList<ISort> sort = null,
+        public static async Task<IEnumerable<T>> GetListAutoMapAsync<T>(this IDbConnection connection, object? predicate = null, IList<ISort> sort = null,
             IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = false, IList<IProjection> colsToSelect = null)
         {
             return await Instance.GetListAutoMapAsync<T>(connection, predicate, sort, transaction, commandTimeout, buffered, colsToSelect).ConfigureAwait(false);
@@ -259,7 +259,7 @@ namespace DapperExtensions
         /// <summary>
         /// Executes a delete query for the specified entity.
         /// </summary>
-        public static Task<bool> DeleteAsync<T>(this IDbConnection connection, T entity, IDbTransaction transaction = null, int? commandTimeout = null)
+        public static Task<bool> DeleteAsync<T>(this IDbConnection connection, T? entity, IDbTransaction transaction = null, int? commandTimeout = null)
         {
             return Instance.DeleteAsync(connection, entity, transaction, commandTimeout);
         }
@@ -267,7 +267,7 @@ namespace DapperExtensions
         /// <summary>
         /// Executes a delete query using the specified predicate.
         /// </summary>
-        public static Task<bool> DeleteAsync<T>(this IDbConnection connection, object predicate, IDbTransaction transaction = null, int? commandTimeout = null)
+        public static Task<bool> DeleteAsync<T>(this IDbConnection connection, object? predicate, IDbTransaction transaction = null, int? commandTimeout = null)
         {
             return Instance.DeleteAsync(connection, predicate, transaction, commandTimeout);
         }

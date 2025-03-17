@@ -16,19 +16,19 @@ namespace DapperExtensions.Sql
 
         bool SupportsMultipleStatements();
 
-        string Select(IClassMapper classMap, IPredicate predicate, IList<ISort> sort, IDictionary<string, object> parameters, IList<IProjection> colsToSelect, IList<IReferenceMap> includedProperties = null);
+        string Select(IClassMapper classMap, IPredicate? predicate, IList<ISort>? sort, IDictionary<string, object> parameters, IList<IProjection>? colsToSelect, IList<IReferenceMap>? includedProperties = null);
 
-        string SelectPaged(IClassMapper classMap, IPredicate predicate, IList<ISort> sort, int page, int resultsPerPage, IDictionary<string, object> parameters, IList<IProjection> colsToSelect, IList<IReferenceMap> includedProperties = null);
+        string SelectPaged(IClassMapper classMap, IPredicate? predicate, IList<ISort> sort, int page, int resultsPerPage, IDictionary<string, object> parameters, IList<IProjection> colsToSelect, IList<IReferenceMap> includedProperties = null);
 
-        string SelectSet(IClassMapper classMap, IPredicate predicate, IList<ISort> sort, int firstResult, int maxResults, IDictionary<string, object> parameters, IList<IProjection> colsToSelect, IList<IReferenceMap> includedProperties = null);
+        string SelectSet(IClassMapper classMap, IPredicate? predicate, IList<ISort> sort, int firstResult, int maxResults, IDictionary<string, object> parameters, IList<IProjection> colsToSelect, IList<IReferenceMap> includedProperties = null);
 
-        string Count(IClassMapper classMap, IPredicate predicate, IDictionary<string, object> parameters, IList<IReferenceMap> includedProperties = null);
+        string Count(IClassMapper classMap, IPredicate? predicate, IDictionary<string, object> parameters, IList<IReferenceMap> includedProperties = null);
 
         string Insert(IClassMapper classMap);
 
-        string Update(IClassMapper classMap, IPredicate predicate, IDictionary<string, object> parameters, bool ignoreAllKeyProperties, IList<IProjection> colsToUpdate);
+        string Update(IClassMapper classMap, IPredicate? predicate, IDictionary<string, object> parameters, bool ignoreAllKeyProperties, IList<IProjection> colsToUpdate);
 
-        string Delete(IClassMapper classMap, IPredicate predicate, IDictionary<string, object> parameters);
+        string Delete(IClassMapper classMap, IPredicate? predicate, IDictionary<string, object> parameters);
 
         string IdentitySql(IMemberMap identityColumn);
 
@@ -81,7 +81,7 @@ namespace DapperExtensions.Sql
             }
         }
 
-        public virtual string Select(IClassMapper classMap, IPredicate predicate, IList<ISort> sort, IDictionary<string, object> parameters, IList<IProjection> colsToSelect, IList<IReferenceMap> includedProperties = null)
+        public virtual string Select(IClassMapper classMap, IPredicate? predicate, IList<ISort> sort, IDictionary<string, object> parameters, IList<IProjection> colsToSelect, IList<IReferenceMap> includedProperties = null)
         {
             if (parameters == null)
             {
@@ -121,7 +121,7 @@ namespace DapperExtensions.Sql
             return sql.ToString();
         }
 
-        public virtual string SelectPaged(IClassMapper classMap, IPredicate predicate, IList<ISort> sort, int page, int resultsPerPage, IDictionary<string, object> parameters, IList<IProjection> colsToSelect, IList<IReferenceMap> includedProperties = null)
+        public virtual string SelectPaged(IClassMapper classMap, IPredicate? predicate, IList<ISort> sort, int page, int resultsPerPage, IDictionary<string, object> parameters, IList<IProjection> colsToSelect, IList<IReferenceMap> includedProperties = null)
         {
             if (sort?.Any() != true)
             {
@@ -140,7 +140,7 @@ namespace DapperExtensions.Sql
             return Configuration.Dialect.GetPagingSql(innerSql.ToString(), page, resultsPerPage, parameters, partitionBy);
         }
 
-        public virtual string SelectSet(IClassMapper classMap, IPredicate predicate, IList<ISort> sort, int firstResult, int maxResults, IDictionary<string, object> parameters, IList<IProjection> colsToSelect, IList<IReferenceMap> includedProperties = null)
+        public virtual string SelectSet(IClassMapper classMap, IPredicate? predicate, IList<ISort> sort, int firstResult, int maxResults, IDictionary<string, object> parameters, IList<IProjection> colsToSelect, IList<IReferenceMap> includedProperties = null)
         {
             if (sort?.Any() != true)
             {
@@ -166,7 +166,7 @@ namespace DapperExtensions.Sql
             return Configuration.Dialect.GetSetSql(innerSql.ToString(), firstResult, maxResults, parameters);
         }
 
-        public virtual string Count(IClassMapper classMap, IPredicate predicate, IDictionary<string, object> parameters, IList<IReferenceMap> includedProperties = null)
+        public virtual string Count(IClassMapper classMap, IPredicate? predicate, IDictionary<string, object> parameters, IList<IReferenceMap> includedProperties = null)
         {
             if (parameters == null)
             {
@@ -266,7 +266,7 @@ namespace DapperExtensions.Sql
             return sql;
         }
 
-        public virtual string Update(IClassMapper classMap, IPredicate predicate, IDictionary<string, object> parameters, bool ignoreAllKeyProperties, IList<IProjection> colsToUpdate)
+        public virtual string Update(IClassMapper classMap, IPredicate? predicate, IDictionary<string, object> parameters, bool ignoreAllKeyProperties, IList<IProjection> colsToUpdate)
         {
             if (predicate == null)
             {
@@ -310,7 +310,7 @@ namespace DapperExtensions.Sql
             return $"UPDATE {GetTableName(classMap)} SET {setSql.AppendStrings()} WHERE {predicate.GetSql(this, parameters, true)}";
         }
 
-        public virtual string Delete(IClassMapper classMap, IPredicate predicate, IDictionary<string, object> parameters)
+        public virtual string Delete(IClassMapper classMap, IPredicate? predicate, IDictionary<string, object> parameters)
         {
             if (predicate == null)
             {

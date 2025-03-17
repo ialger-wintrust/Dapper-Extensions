@@ -88,7 +88,7 @@ namespace DapperExtensions.xUnitTest.Sql
             public void WithPredicate_GeneratesSql()
             {
                 IDictionary<string, object> parameters = new Dictionary<string, object>();
-                var predicate = new Mock<IPredicate>();
+                var predicate = new Mock<IPredicate?>();
                 predicate.Setup(p => p.GetSql(Generator.Object, parameters, false)).Returns("PredicateWhere");
 
                 Generator.Setup(g => g.GetTables(It.IsAny<IClassMapper>(), It.IsAny<IDictionary<string, object>>(), It.IsAny<IList<IReferenceMap>>()))
@@ -139,7 +139,7 @@ namespace DapperExtensions.xUnitTest.Sql
                                            sortField.Object
                                        };
 
-                Mock<IPredicate> predicate = new Mock<IPredicate>();
+                Mock<IPredicate?> predicate = new Mock<IPredicate?>();
                 predicate.Setup(p => p.GetSql(Generator.Object, parameters, false)).Returns("PredicateWhere");
 
                 Generator.Setup(g => g.GetTables(It.IsAny<IClassMapper>(), It.IsAny<IDictionary<string, object>>(), It.IsAny<IList<IReferenceMap>>()))
@@ -248,7 +248,7 @@ namespace DapperExtensions.xUnitTest.Sql
                                            sortField.Object
                                        };
 
-                Mock<IPredicate> predicate = new Mock<IPredicate>();
+                Mock<IPredicate?> predicate = new Mock<IPredicate?>();
                 predicate.Setup(p => p.GetSql(Generator.Object, parameters, false)).Returns("PredicateWhere");
 
                 Generator.Setup(g => g.GetTables(It.IsAny<IClassMapper>(), It.IsAny<IDictionary<string, object>>(), It.IsAny<IList<IReferenceMap>>()))
@@ -337,7 +337,7 @@ namespace DapperExtensions.xUnitTest.Sql
                                            sortField.Object
                                        };
 
-                Mock<IPredicate> predicate = new Mock<IPredicate>();
+                Mock<IPredicate?> predicate = new Mock<IPredicate?>();
                 predicate.Setup(p => p.GetSql(Generator.Object, parameters, false)).Returns("PredicateWhere");
 
                 Generator.Setup(g => g.GetTables(It.IsAny<IClassMapper>(), It.IsAny<IDictionary<string, object>>(), It.IsAny<IList<IReferenceMap>>()))
@@ -424,7 +424,7 @@ namespace DapperExtensions.xUnitTest.Sql
                 Arrange();
 
                 var parameters = new Dictionary<string, object>();
-                var predicate = new Mock<IPredicate>();
+                var predicate = new Mock<IPredicate?>();
                 predicate.Setup(p => p.GetSql(Generator.Object, parameters, false)).Returns("PredicateWhere").Verifiable();
 
                 var result = Generator.Object.Count(ClassMap.Object, predicate.Object, parameters);
@@ -619,7 +619,7 @@ namespace DapperExtensions.xUnitTest.Sql
             [Fact]
             public void WithNullParameters_ThrowsException()
             {
-                var predicate = new Mock<IPredicate>();
+                var predicate = new Mock<IPredicate?>();
                 var ex = Assert.Throws<ArgumentNullException>(() => Generator.Object.Update(ClassMap.Object, predicate.Object, null, false, null));
                 Assert.Contains("cannot be null", ex.Message);
                 Assert.Equal("Parameters", ex.ParamName, StringComparer.InvariantCultureIgnoreCase);
@@ -641,7 +641,7 @@ namespace DapperExtensions.xUnitTest.Sql
                                                     };
 
                 ClassMap.SetupGet(c => c.Properties).Returns(properties).Verifiable();
-                Mock<IPredicate> predicate = new Mock<IPredicate>();
+                Mock<IPredicate?> predicate = new Mock<IPredicate?>();
                 Dictionary<string, object> parameters = new Dictionary<string, object>();
 
                 var ex = Assert.Throws<ArgumentException>(() => Generator.Object.Update(ClassMap.Object, predicate.Object, parameters, false, null));
@@ -674,7 +674,7 @@ namespace DapperExtensions.xUnitTest.Sql
 
                 Dialect.SetupGet(d => d.SupportsMultipleStatements).Returns(false).Verifiable();
 
-                var predicate = new Mock<IPredicate>();
+                var predicate = new Mock<IPredicate?>();
                 var parameters = new Dictionary<string, object>();
                 predicate.Setup(p => p.GetSql(It.IsAny<ISqlGenerator>(), It.IsAny<IDictionary<string, object>>(), It.IsAny<bool>()))
                     .Returns("Predicate").Verifiable();
@@ -715,7 +715,7 @@ namespace DapperExtensions.xUnitTest.Sql
 
                 Dialect.SetupGet(d => d.SupportsMultipleStatements).Returns(false).Verifiable();
 
-                Mock<IPredicate> predicate = new Mock<IPredicate>();
+                Mock<IPredicate?> predicate = new Mock<IPredicate?>();
                 Dictionary<string, object> parameters = new Dictionary<string, object>();
                 predicate.Setup(p => p.GetSql(It.IsAny<ISqlGenerator>(), It.IsAny<IDictionary<string, object>>(), It.IsAny<bool>()))
                     .Returns("Predicate").Verifiable();
@@ -757,7 +757,7 @@ namespace DapperExtensions.xUnitTest.Sql
                 Dialect.SetupGet(d => d.SupportsMultipleStatements).Returns(false).Verifiable();
 
                 var parameters = new Dictionary<string, object>();
-                Mock<IPredicate> predicate = new Mock<IPredicate>();
+                Mock<IPredicate?> predicate = new Mock<IPredicate?>();
                 predicate.Setup(p => p.GetSql(It.IsAny<ISqlGenerator>(), It.IsAny<IDictionary<string, object>>(), It.IsAny<bool>()))
                     .Returns("Predicate").Verifiable();
 
@@ -789,7 +789,7 @@ namespace DapperExtensions.xUnitTest.Sql
             [Fact]
             public void WithNullParameters_ThrowsException()
             {
-                var predicate = new Mock<IPredicate>();
+                var predicate = new Mock<IPredicate?>();
                 var ex = Assert.Throws<ArgumentNullException>(() => Generator.Object.Delete(ClassMap.Object, predicate.Object, null));
                 Assert.Contains("cannot be null", ex.Message);
                 Assert.Equal("Parameters", ex.ParamName, StringComparer.InvariantCultureIgnoreCase);
@@ -798,7 +798,7 @@ namespace DapperExtensions.xUnitTest.Sql
             [Fact]
             public void GeneratesSql()
             {
-                var predicate = new Mock<IPredicate>();
+                var predicate = new Mock<IPredicate?>();
                 predicate.Setup(p => p.GetSql(It.IsAny<ISqlGenerator>(), It.IsAny<IDictionary<string, object>>(), It.IsAny<bool>())).Returns("PredicateWhere");
 
                 Generator.Setup(g => g.GetTableName(ClassMap.Object, It.IsAny<bool>())).Returns("TableName").Verifiable();

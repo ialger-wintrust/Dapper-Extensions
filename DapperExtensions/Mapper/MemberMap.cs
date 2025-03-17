@@ -27,8 +27,8 @@ namespace DapperExtensions.Mapper
         MemberInfo MemberInfo { get; }
         IClassMapper ClassMapper { get; }
         IMemberMap ParentProperty { get; }
-        object GetValue(object obj);
-        void SetValue(object obj, object value);
+        object? GetValue(object? obj);
+        void SetValue(object? obj, object value);
         Type MemberType { get; }
         bool UseEnumDescription { get; }
     }
@@ -258,7 +258,7 @@ namespace DapperExtensions.Mapper
             return this;
         }
 
-        public object GetValue(object obj)
+        public object? GetValue(object? obj)
         {
             if (MemberInfo is FieldInfo info)
             {
@@ -274,7 +274,7 @@ namespace DapperExtensions.Mapper
             }
         }
 
-        public void SetValue(object obj, object value)
+        public void SetValue(object? obj, object value)
         {
             if (MemberInfo is FieldInfo info)
             {

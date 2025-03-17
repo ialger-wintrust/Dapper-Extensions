@@ -17,7 +17,7 @@ namespace DapperExtensions.Predicate
             get { return _items.AsReadOnly(); }
         }
 
-        public void Add<T>(IPredicate predicate, IList<ISort> sort = null)
+        public void Add<T>(IPredicate? predicate, IList<ISort> sort = null)
         {
             _items.Add(new GetMultiplePredicateItem
             {
@@ -29,7 +29,7 @@ namespace DapperExtensions.Predicate
 
         public class GetMultiplePredicateItem
         {
-            public object Value { get; set; }
+            public object? Value { get; set; }
             public Type Type { get; set; }
             public IList<ISort> Sort { get; set; }
         }

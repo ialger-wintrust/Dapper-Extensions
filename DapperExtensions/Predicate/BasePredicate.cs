@@ -20,13 +20,13 @@ namespace DapperExtensions.Predicate
             var map = sqlGenerator.Configuration.GetMap(entityType);
             if (map == null)
             {
-                throw new NullReferenceException(string.Format("Map was not found for {0}", entityType));
+                throw new NullReferenceException($"Map was not found for {entityType}");
             }
 
             var propertyMap = map.Properties.SingleOrDefault(p => p.Name.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase));
             if (propertyMap == null)
             {
-                throw new NullReferenceException(string.Format("{0} was not found for {1}", propertyName, entityType));
+                throw new NullReferenceException($"{propertyName} was not found for {entityType}");
             }
 
             return sqlGenerator.GetColumnName(map, propertyMap, false, isDml, includePrefix);

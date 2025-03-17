@@ -114,9 +114,11 @@ public static class CrudFixture
             };
             var id = Db.Insert(p1);
 
-            Person p2 = Db.Get<Person>(id);
+            Person? p2 = Db.Get<Person>(id);
             Db.Delete(p2);
-            Assert.Null(Db.Get<Person>(id));
+
+            var deletedPerson = Db.Get<Person>(id);
+            Assert.Null(deletedPerson);
         }
 
         [Fact]
@@ -143,12 +145,40 @@ public static class CrudFixture
             var list = Db.GetList<Person>();
             Assert.Equal(3, list.Count());
 
-            IPredicate pred = Predicates.Field<Person>(p => p.LastName, Operator.Eq, "Bar");
+            IPredicate? pred = Predicates.Field<Person>(p => p.LastName, Operator.Eq, "Bar");
             var result = Db.Delete<Person>(pred);
             Assert.True(result);
 
             list = Db.GetList<Person>();
             Assert.Equal(1, list.Count());
+        }
+
+
+        [Fact]
+        public void UsingMultipleKeys_DeletesRows()
+        {
+            var p1 = new Person { Active = true, FirstName = "Foo", LastName = "Bar", DateCreated = DateTime.UtcNow };
+            var p2 = new Person { Active = true, FirstName = "Foo", LastName = "Bar", DateCreated = DateTime.UtcNow };
+            var p3 = new Person { Active = true, FirstName = "Foo", LastName = "Barz", DateCreated = DateTime.UtcNow };
+            var id1 = Db.Insert(p1);
+            var id2 = Db.Insert(p2);
+            var id3 = Db.Insert(p3);
+
+            var ids = new List<dynamic>
+            {
+                id1,
+                id2,
+                id3
+            };
+
+            var list = Db.GetList<Person>().ToList();
+            Assert.Equal(3, list.Count());
+
+            var result = Db.Delete<Person>(list);
+            Assert.True(result);
+
+            var actualPersonList = Db.GetList<Person>();
+            Assert.Empty(actualPersonList);
         }
 
         [Fact]
@@ -414,4 +444,6 @@ public static class CrudFixture
             Dispose();
         }
     }
+
+
 }
