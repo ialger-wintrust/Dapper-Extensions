@@ -71,8 +71,8 @@ namespace DapperExtensions.xUnitTest.IntegrationTests.SqlServer
                         DateCreated = DateTime.Now,
                         Active = true
                     };
-                    var id = Db.Insert(p2);
-                    ids.Add(id);
+                    var person = Db.Insert(p2);
+                    ids.Add(person.Id);
                 }
 
                 var total = DateTime.Now.Subtract(start).TotalMilliseconds;
@@ -109,8 +109,8 @@ namespace DapperExtensions.xUnitTest.IntegrationTests.SqlServer
                 for (var i = 0; i < cnt; i++)
                 {
                     var a2 = new Animal { Name = "Name" + i };
-                    var id = Db.Insert(a2);
-                    ids.Add(id);
+                    var animal = Db.Insert(a2);
+                    ids.Add(animal.Id);
                 }
 
                 var total = DateTime.Now.Subtract(start).TotalMilliseconds;
@@ -149,8 +149,8 @@ namespace DapperExtensions.xUnitTest.IntegrationTests.SqlServer
                 {
                     var key = (i + 1).ToString().PadLeft(15, '0');
                     var ca2 = new Car { Id = key, Name = "Name" + i };
-                    var id = Db.Insert(ca2);
-                    ids.Add(id);
+                    var car = Db.Insert(ca2);
+                    ids.Add(car.Id);
                 }
 
                 var total = DateTime.Now.Subtract(start).TotalMilliseconds;

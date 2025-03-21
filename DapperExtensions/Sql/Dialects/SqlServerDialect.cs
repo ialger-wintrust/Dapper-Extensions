@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Text;
+using DapperExtensions.Mapper;
 using DapperExtensions.Predicate;
 
 namespace DapperExtensions.Sql.Dialects
@@ -18,27 +21,29 @@ namespace DapperExtensions.Sql.Dialects
             get { return ']'; }
         }
 
-        public override string GetIdentitySql(Type memberType)
+        public override string GetIdentitySql()
         {
-            string sqlType;
+            //string sqlType;
 
-            switch (memberType)
-            {
-                case var _ when memberType == typeof(short):
-                    sqlType = "SMALLINT";
-                    break;
+            //switch (memberType)
+            //{
+            //    case var _ when memberType == typeof(short):
+            //        sqlType = "SMALLINT";
+            //        break;
 
-                case var _ when memberType == typeof(int):
-                    sqlType = "INT";
-                    break;
+            //    case var _ when memberType == typeof(int):
+            //        sqlType = "INT";
+            //        break;
 
-                case var _ when memberType == typeof(long):
-                default:
-                    sqlType = "BIGINT";
-                    break;
-            }
+            //    case var _ when memberType == typeof(long):
+            //    default:
+            //        sqlType = "BIGINT";
+            //        break;
+            //}
 
-            return $"SELECT CAST(SCOPE_IDENTITY() AS {sqlType}) AS [Id]";
+            //var identifierStrings = returnColumns.Select(identifier => $"INSERTED.{identifier.Alias}");
+
+            return "OUTPUT INSERTED.*";
         }
 
         public override string GetPagingSql(string sql, int page, int resultsPerPage, IDictionary<string, object> parameters, string partitionBy)

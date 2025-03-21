@@ -51,16 +51,26 @@ namespace DapperExtensions.Mapper
         {
         }
 
-        public MemberMap(MemberInfo memberInfo, IClassMapper classMapper, bool isReference = false, IMemberMap parent = null)
+        public MemberMap(MemberInfo memberInfo, IClassMapper classMapper, bool isReference = false, IMemberMap? parent = null)
         {
-            MemberInfo = memberInfo;
-            ColumnName = isReference ? classMapper.Properties
-                                                  .Where(x => x.MemberInfo == MemberInfo)
-                                                  .Select(c => c.ColumnName)
-                                                  .FirstOrDefault() : MemberInfo.Name;
-            ClassMapper = classMapper;
+            try
+            {
+                MemberInfo = memberInfo;
+                ClassMapper = classMapper;
 
-            ParentProperty = parent;
+                ColumnName = isReference 
+                    ? classMapper.Properties
+                        .Where(x => x.MemberInfo == MemberInfo)
+                        .Select(c => c.ColumnName)
+                        .First() 
+                    : MemberInfo.Name;
+
+                ParentProperty = parent;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Unable to create a member map for {memberInfo.Name}", ex);
+            }
         }
         #endregion
 

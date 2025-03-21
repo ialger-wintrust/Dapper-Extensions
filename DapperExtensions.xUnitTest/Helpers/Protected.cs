@@ -101,7 +101,7 @@ namespace DapperExtensions.xUnitTest.Helpers
 
                 return p.GetType();
             }).ToArray();
-            MethodInfo method = _obj.GetType().GetMethod(name, BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public, null, types, null);
+            var method = _obj.GetType().GetMethod(name, BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public, null, types, null);
             if (method == null)
             {
                 throw new ArgumentException(string.Format("{0} was not found in {1}.", name, _obj.GetType()), name);

@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using DapperExtensions.Sql;
 using DapperExtensions.Sql.Dialects;
 using Microsoft.Data.SqlClient;
 

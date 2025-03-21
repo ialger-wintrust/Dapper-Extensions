@@ -57,7 +57,7 @@
                 return;
             }
 
-            int i = 10;
+            var i = 10;
             while (IsDatabaseInUse(databaseName) && i > 0)
             {
                 i--;

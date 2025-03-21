@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using DapperExtensions.Mapper;
 
 namespace DapperExtensions.Sql.Dialects
 {
@@ -21,7 +22,7 @@ namespace DapperExtensions.Sql.Dialects
 
         string GetColumnName(string prefix, string columnName, string alias);
 
-        string GetIdentitySql(Type identityType);
+        string GetIdentitySql();
 
         string GetPagingSql(string sql, int page, int resultsPerPage, IDictionary<string, object> parameters, string partitionBy);
 
@@ -129,7 +130,7 @@ namespace DapperExtensions.Sql.Dialects
             return ((page == 0 ? 1 : page) - 1) * resultsPerPage;
         }
 
-        public abstract string GetIdentitySql(Type identityType);
+        public abstract string GetIdentitySql();
 
         public abstract string GetPagingSql(string sql, int page, int resultsPerPage, IDictionary<string, object> parameters, string partitionBy);
 

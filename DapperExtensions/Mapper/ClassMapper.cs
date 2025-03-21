@@ -13,12 +13,14 @@ namespace DapperExtensions.Mapper
         string SchemaName { get; }
         string TableName { get; }
         string SimpleAlias { get; }
-        IList<IMemberMap> Properties { get; }
-        IList<IReferenceMap> References { get; }
+        IList<IMemberMap>? Properties { get; }
+        IList<IReferenceMap>? References { get; }
         Type EntityType { get; }
         Guid Identity { get; }
         Guid ParentIdentity { get; }
+
         void SetIdentity(Guid identity);
+
         void SetParentIdentity(Guid identity);
     }
 
@@ -170,7 +172,7 @@ namespace DapperExtensions.Mapper
         /// <summary>
         /// Fluently, maps an entity property to a column
         /// </summary>
-        protected virtual MemberMap Map(PropertyInfo propertyInfo, MemberMap parent = null)
+        protected virtual MemberMap Map(PropertyInfo propertyInfo, MemberMap? parent = null)
         {
             var result = new MemberMap(propertyInfo, this, parent: parent);
             if (GuardForDuplicatePropertyMap(result))

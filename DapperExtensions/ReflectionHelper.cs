@@ -247,7 +247,7 @@ namespace DapperExtensions
                 .DefineDynamicModule(moduleName);
         }
 
-        public static TypeBuilder CreateTypeBuilder(ModuleBuilder moduleBuilder, string typeName, Type baseType = null)
+        public static TypeBuilder CreateTypeBuilder(ModuleBuilder moduleBuilder, string typeName, Type? baseType = null)
         {
             string _typeName = string.Format("{0}{1}", typeName, DapperExtensions.GetNextGuid().ToString().Substring(0, 8));
             return moduleBuilder

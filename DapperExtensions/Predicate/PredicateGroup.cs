@@ -18,17 +18,25 @@ namespace DapperExtensions.Predicate
     {
         public GroupOperator Operator { get; set; }
         public IList<IPredicate> Predicates { get; set; }
+
         public string GetSql(ISqlGenerator sqlGenerator, IDictionary<string, object> parameters, bool isDml = false)
         {
             string seperator = Operator == GroupOperator.And ? " AND " : " OR ";
-            return "(" + Predicates.Aggregate(new StringBuilder(),
-                (sb, p) => (sb.Length == 0 ? sb : sb.Append(seperator)).Append(p.GetSql(sqlGenerator, parameters, isDml)),
+
+            var predicateString = Predicates.Aggregate(new StringBuilder(),
+                (sb, p) =>
+                    (sb.Length == 0 ? sb : sb.Append(seperator)).Append(p.GetSql(sqlGenerator, parameters, isDml)),
                 sb =>
                 {
                     var s = sb.ToString();
-                    if (s.Length == 0) return sqlGenerator.Configuration.Dialect.EmptyExpression;
-                    return s;
-                }) + ")";
+
+                    return s.Length == 0
+                        ? sqlGenerator.Configuration.Dialect.EmptyExpression
+                        : s;
+                }
+            );
+
+            return $"({predicateString})";
         }
     }
 }

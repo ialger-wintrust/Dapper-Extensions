@@ -1,78 +1,102 @@
-﻿using DapperExtensions.Mapper;
+﻿using Azure;
+using DapperExtensions.Mapper;
 using DapperExtensions.Predicate;
 using DapperExtensions.Sql;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using static Slapper.AutoMapper;
 
 namespace DapperExtensions
 {
     #region Interfaces
+
     public interface IBaseDatabase : IDisposable
     {
         bool HasActiveTransaction { get; }
         IDbConnection Connection { get; }
+
         void BeginTransaction(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
+
         void Commit();
+
         void Rollback();
+
         void RunInTransaction(Action action);
+
         T RunInTransaction<T>(Func<T> func);
     }
 
     public interface IDatabase : IBaseDatabase
     {
-        T Get<T>(dynamic id, IDbTransaction transaction = null, int? commandTimeout = null);
-        void Insert<T>(IEnumerable<T> entities, IDbTransaction? transaction = null, int? commandTimeout = null);
-        dynamic Insert<T>(T entity, IDbTransaction? transaction = null, int? commandTimeout = null);
-        bool Update<T>(IEnumerable<T>? entities, IDbTransaction? transaction = null, int? commandTimeout = null, bool ignoreAllKeyProperties = false);
-        bool Update<T>(T? entity, IDbTransaction? transaction = null, int? commandTimeout = null, bool ignoreAllKeyProperties = false);
-        bool Delete<T>(T? entity, IDbTransaction? transaction = null, int? commandTimeout = null);
-        bool Delete<T>(IEnumerable<T>? entities, IDbTransaction? transaction = null, int? commandTimeout = null);
-        bool Delete<T>(object? predicate, IDbTransaction? transaction = null, int? commandTimeout = null);
-        IEnumerable<T> GetList<T>(object? predicate = null, IList<ISort>? sort = null, IDbTransaction? transaction = null, int? commandTimeout = null, bool buffered = true);
-        IEnumerable<T> GetPage<T>(object? predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction? transaction = null, int? commandTimeout = null, bool buffered = true);
-        IEnumerable<T> GetSet<T>(object? predicate, IList<ISort> sort, int firstResult, int maxResults, IDbTransaction? transaction = null, int? commandTimeout = null, bool buffered = true);
         int Count<T>(object? predicate = null, IDbTransaction? transaction = null, int? commandTimeout = null);
+
+        T? Find<T>(object predicate, IDbTransaction? transaction = null, int? commandTimeout = null);
+
+        T? Get<T>(dynamic id, IDbTransaction? transaction = null, int? commandTimeout = null);
+
+        T Insert<T>(T entity, IDbTransaction? transaction = null, int? commandTimeout = null);
+
+        int Update<T>(T? entity, IDbTransaction? transaction = null, int? commandTimeout = null);
+
+        bool Delete<T>(T? entity, IDbTransaction? transaction = null, int? commandTimeout = null);
+
+        bool Delete<T>(object? predicate, IDbTransaction? transaction = null, int? commandTimeout = null);
+
+        IEnumerable<T>? List<T>(object? predicate = null, IList<ISort>? sort = null, IDbTransaction? transaction = null, int? commandTimeout = null, bool buffered = true);
+
+        IEnumerable<T>? Page<T>(object? predicate = null, IList<ISort>? sort = null, int page = 1, int resultsPerPage = 1000, IDbTransaction? transaction = null, int? commandTimeout = null, bool buffered = true);
+
         IMultipleResultReader GetMultiple(GetMultiplePredicate predicate, IDbTransaction? transaction = null, int? commandTimeout = null);
+
         Guid GetNextGuid();
+
         IClassMapper GetMap<T>();
+
         void ClearCache();
 
+        //IEnumerable<T> GetSet<T>(object? predicate, IList<ISort> sort, int firstResult, int maxResults, IDbTransaction? transaction = null, int? commandTimeout = null, bool buffered = true);
+
+        //IEnumerable<T> GetList<T>(object? predicate = null, IList<ISort>? sort = null, IDbTransaction? transaction = null, int? commandTimeout = null, bool buffered = true);
+        //void Insert<T>(IEnumerable<T> entities, IDbTransaction? transaction = null, int? commandTimeout = null);
+        //bool Update<T>(IEnumerable<T>? entities, IDbTransaction? transaction = null, int? commandTimeout = null, bool ignoreAllKeyProperties = false);
+        //bool Delete<T>(IEnumerable<T>? entities, IDbTransaction? transaction = null, int? commandTimeout = null);
     }
 
     public interface IAsyncDatabase : IBaseDatabase
     {
-        Task<T> Get<T>(dynamic id, IDbTransaction transaction, int? commandTimeout = null);
-        Task<T> Get<T>(dynamic id, int? commandTimeout = null);
-        void Insert<T>(IEnumerable<T> entities, IDbTransaction transaction, int? commandTimeout = null);
-        void Insert<T>(IEnumerable<T> entities, int? commandTimeout = null);
-        Task<dynamic> Insert<T>(T entity, IDbTransaction transaction, int? commandTimeout = null);
-        Task<dynamic> Insert<T>(T entity, int? commandTimeout = null);
-        Task<bool> Update<T>(T entity, IDbTransaction transaction, int? commandTimeout = null, bool ignoreAllKeyProperties = false);
-        Task<bool> Update<T>(T entity, int? commandTimeout = null, bool ignoreAllKeyProperties = false);
-        Task<bool> Delete<T>(T? entity, IDbTransaction transaction, int? commandTimeout = null);
-        Task<bool> Delete<T>(T? entity, int? commandTimeout = null);
-        Task<bool> Delete<T>(object? predicate, IDbTransaction transaction, int? commandTimeout = null);
-        Task<bool> Delete<T>(object? predicate, int? commandTimeout = null);
-        Task<IEnumerable<T>> GetList<T>(object predicate, IList<ISort> sort, IDbTransaction transaction, int? commandTimeout = null, bool buffered = true);
-        Task<IEnumerable<T>> GetList<T>(object? predicate = null, IList<ISort>? sort = null, int? commandTimeout = null, bool buffered = true);
-        Task<IEnumerable<T>> GetPage<T>(object predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction, int? commandTimeout = null, bool buffered = true);
-        Task<IEnumerable<T>> GetPage<T>(object? predicate, IList<ISort> sort, int page, int resultsPerPage, int? commandTimeout = null, bool buffered = true);
-        Task<IEnumerable<T>> GetSet<T>(object predicate, IList<ISort> sort, int firstResult, int maxResults, IDbTransaction transaction, int? commandTimeout, bool buffered);
-        Task<IEnumerable<T>> GetSet<T>(object predicate, IList<ISort> sort, int firstResult, int maxResults, int? commandTimeout, bool buffered);
-        Task<int> Count<T>(object predicate, IDbTransaction transaction, int? commandTimeout = null);
-        Task<int> Count<T>(object? predicate, int? commandTimeout = null);
-        Task<IMultipleResultReader> GetMultiple(GetMultiplePredicate predicate, IDbTransaction transaction, int? commandTimeout = null);
-        Task<IMultipleResultReader> GetMultiple(GetMultiplePredicate predicate, int? commandTimeout = null);
-        Task<Guid> GetNextGuid();
-        Task<IClassMapper> GetMap<T>();
-        void ClearCache();
+        Task<int> CountAsync<T>(object predicate, IDbTransaction? transaction = null, int? commandTimeout = null);
 
+        Task<T?> FindAsync<T>(object predicate, IDbTransaction? transaction = null, int? commandTimeout = null);
+
+        Task<T?> GetAsync<T>(dynamic id, IDbTransaction? transaction = null, int? commandTimeout = null);
+
+        Task<dynamic> InsertAsync<T>(T entity, IDbTransaction? transaction = null, int? commandTimeout = null);
+
+        Task<int> UpdateAsync<T>(T entity, IDbTransaction? transaction = null, int? commandTimeout = null, bool ignoreAllKeyProperties = false);
+
+        Task<bool> DeleteAsync<T>(T? entity, IDbTransaction? transaction = null, int? commandTimeout = null);
+
+        Task<bool> DeleteAsync<T>(object? predicate, IDbTransaction? transaction = null, int? commandTimeout = null);
+
+        Task<IEnumerable<T>> ListAsync<T>(object? predicate = null, IList<ISort>? sort = null, IDbTransaction? transaction = null, int? commandTimeout = null /*bool buffered = true*/);
+
+        Task<IEnumerable<T>> PageAsync<T>(object? predicate = null, IList<ISort>? sort = null, int page = 1, int resultsPerPage = 1000, IDbTransaction? transaction = null, int? commandTimeout = null /*bool buffered = true*/);
+
+        Task<IMultipleResultReader> GetMultipleAsync(GetMultiplePredicate predicate, IDbTransaction? transaction = null, int? commandTimeout = null);
+
+        Task<Guid> GetNextGuidAsync();
+
+        Task<IClassMapper> GetMapAsync<T>();
+
+        void ClearCache();
     }
-    #endregion
+
+    #endregion Interfaces
 
     #region Implementation
+
     public abstract class BaseDatabase : IBaseDatabase
     {
         protected IDbTransaction _transaction;
@@ -190,131 +214,61 @@ namespace DapperExtensions
             _dapper = new DapperImplementor(sqlGenerator);
         }
 
-        public virtual T Get<T>(dynamic id, IDbTransaction transaction, int? commandTimeout)
+        public virtual void ClearCache()
         {
-            return (T)_dapper.Get<T>(Connection, id, transaction, commandTimeout);
+            ClearCache(_dapper);
         }
 
-        public virtual T Get<T>(dynamic id, int? commandTimeout)
-        {
-            return (T)_dapper.Get<T>(Connection, id, _transaction, commandTimeout);
-        }
-
-        public virtual void Insert<T>(IEnumerable<T> entities, IDbTransaction transaction, int? commandTimeout)
-        {
-            _dapper.Insert(Connection, entities, transaction, commandTimeout);
-        }
-
-        public virtual void Insert<T>(IEnumerable<T> entities, int? commandTimeout)
-        {
-            _dapper.Insert(Connection, entities, _transaction, commandTimeout);
-        }
-
-        public virtual dynamic Insert<T>(T entity, IDbTransaction? transaction, int? commandTimeout)
-        {
-            return _dapper.Insert(Connection, entity, transaction, commandTimeout);
-        }
-
-        public bool Update<T>(IEnumerable<T>? entities, IDbTransaction? transaction = null, int? commandTimeout = null,
-            bool ignoreAllKeyProperties = false)
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual dynamic Insert<T>(T entity, int? commandTimeout)
-        {
-            return _dapper.Insert(Connection, entity, _transaction, commandTimeout);
-        }
-
-        public virtual bool Update<T>(T? entity, IDbTransaction? transaction, int? commandTimeout, bool ignoreAllKeyProperties)
-        {
-            return _dapper.Update(Connection, entity, transaction, commandTimeout, ignoreAllKeyProperties);
-        }
-
-        public virtual bool Update<T>(T? entity, int? commandTimeout, bool ignoreAllKeyProperties)
-        {
-            return _dapper.Update(Connection, entity, _transaction, commandTimeout, ignoreAllKeyProperties);
-        }
-
-        public virtual bool Delete<T>(T? entity, IDbTransaction transaction, int? commandTimeout)
-        {
-            return _dapper.Delete(Connection, entity, transaction, commandTimeout);
-        }
-
-        public bool Delete<T>(IEnumerable<T>? entities, IDbTransaction? transaction = null, int? commandTimeout = null)
-        {
-            return _dapper.Delete<T>(Connection, entities, transaction, commandTimeout);
-
-        }
-
-        public virtual bool Delete<T>(T? entity, int? commandTimeout)
-        {
-            return _dapper.Delete(Connection, entity, _transaction, commandTimeout);
-        }
-
-        public virtual bool Delete<T>(object? predicate, IDbTransaction transaction, int? commandTimeout)
-        {
-            return _dapper.Delete<T>(Connection, predicate, transaction, commandTimeout);
-        }
-
-        public virtual bool Delete<T>(object? predicate, int? commandTimeout)
-        {
-            return _dapper.Delete<T>(Connection, predicate, _transaction, commandTimeout);
-        }
-
-        public virtual IEnumerable<T> GetList<T>(object? predicate, IList<ISort> sort, IDbTransaction transaction, int? commandTimeout, bool buffered)
-        {
-            return _dapper.GetList<T>(Connection, predicate, sort, transaction, commandTimeout, buffered);
-        }
-
-        public virtual IEnumerable<T> GetList<T>(object? predicate, IList<ISort> sort, int? commandTimeout, bool buffered)
-        {
-            return _dapper.GetList<T>(Connection, predicate, sort, _transaction, commandTimeout, buffered);
-        }
-
-        public virtual IEnumerable<T> GetPage<T>(object? predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction, int? commandTimeout, bool buffered)
-        {
-            return _dapper.GetPage<T>(Connection, predicate, sort, page, resultsPerPage, transaction, commandTimeout, buffered);
-        }
-
-        public virtual IEnumerable<T> GetPage<T>(object? predicate, IList<ISort> sort, int page, int resultsPerPage, int? commandTimeout, bool buffered)
-        {
-            return _dapper.GetPage<T>(Connection, predicate, sort, page, resultsPerPage, _transaction, commandTimeout, buffered);
-        }
-
-        public virtual IEnumerable<T> GetSet<T>(object? predicate, IList<ISort> sort, int firstResult, int maxResults, IDbTransaction transaction, int? commandTimeout, bool buffered)
-        {
-            return _dapper.GetSet<T>(Connection, predicate, sort, firstResult, maxResults, transaction, commandTimeout, buffered);
-        }
-
-        public virtual IEnumerable<T> GetSet<T>(object? predicate, IList<ISort> sort, int firstResult, int maxResults, int? commandTimeout, bool buffered)
-        {
-            return _dapper.GetSet<T>(Connection, predicate, sort, firstResult, maxResults, _transaction, commandTimeout, buffered);
-        }
-
-        public virtual int Count<T>(object? predicate, IDbTransaction? transaction, int? commandTimeout)
+        public int Count<T>(object? predicate = null, IDbTransaction? transaction = null, int? commandTimeout = null)
         {
             return _dapper.Count<T>(Connection, predicate, transaction, commandTimeout);
         }
 
-        public virtual int Count<T>(object? predicate, int? commandTimeout)
+        public T? Find<T>(object predicate, IDbTransaction? transaction = null, int? commandTimeout = null)
         {
-            return _dapper.Count<T>(Connection, predicate, _transaction, commandTimeout);
+            return _dapper.Find<T>(Connection, predicate, transaction, commandTimeout);
         }
 
-        public virtual IMultipleResultReader GetMultiple(GetMultiplePredicate predicate, IDbTransaction transaction, int? commandTimeout)
+        public T? Get<T>(dynamic id, IDbTransaction? transaction = null, int? commandTimeout = null)
+        {
+            return _dapper.Get<T>(Connection, id, transaction, commandTimeout);
+        }
+
+        public T Insert<T>(T entity, IDbTransaction? transaction = null, int? commandTimeout = null)
+        {
+            return _dapper.Insert<T>(Connection, entity, transaction, commandTimeout);
+        }
+
+        public int Update<T>(T? entity, IDbTransaction? transaction = null, int? commandTimeout = null)
+        {
+            return _dapper.Update(Connection, entity, transaction, commandTimeout);
+        }
+
+        public bool Delete<T>(T? entity, IDbTransaction? transaction = null, int? commandTimeout = null)
+        {
+            return _dapper.Delete(Connection, entity, transaction, commandTimeout);
+        }
+
+        public bool Delete<T>(object? predicate, IDbTransaction? transaction = null, int? commandTimeout = null)
+        {
+            return _dapper.Delete<T>(Connection, predicate, transaction, commandTimeout);
+        }
+
+        public IEnumerable<T>? List<T>(object? predicate = null, IList<ISort>? sort = null, IDbTransaction? transaction = null,
+            int? commandTimeout = null, bool buffered = true)
+        {
+            return _dapper.List<T>(Connection, predicate, sort, transaction, commandTimeout);
+        }
+
+        public IEnumerable<T>? Page<T>(object? predicate = null, IList<ISort>? sort = null, int page = 1, int resultsPerPage = 1000,
+            IDbTransaction? transaction = null, int? commandTimeout = null, bool buffered = true)
+        {
+            return _dapper.Page<T>(Connection, predicate, sort, page, resultsPerPage, transaction, commandTimeout, buffered);
+        }
+
+        public IMultipleResultReader GetMultiple(GetMultiplePredicate predicate, IDbTransaction? transaction = null, int? commandTimeout = null)
         {
             return _dapper.GetMultiple(Connection, predicate, transaction, commandTimeout);
-        }
-
-        public virtual IMultipleResultReader GetMultiple(GetMultiplePredicate predicate, int? commandTimeout)
-        {
-            return _dapper.GetMultiple(Connection, predicate, _transaction, commandTimeout);
-        }
-
-        public virtual void ClearCache()
-        {
-            ClearCache(_dapper);
         }
 
         public virtual Guid GetNextGuid()
@@ -334,133 +288,78 @@ namespace DapperExtensions
 
         public AsyncDatabase(IDbConnection connection, ISqlGenerator sqlGenerator) : base(connection)
         {
-            _dapper = new DapperAsyncImplementor(sqlGenerator);
+            //_dapper = new DapperAsyncImplementor(sqlGenerator);
         }
 
-        public async virtual Task<T> Get<T>(dynamic id, IDbTransaction transaction, int? commandTimeout)
-        {
-            return await _dapper.GetAsync<T>(Connection, id, transaction, commandTimeout);
-        }
-
-        public async virtual Task<T> Get<T>(dynamic id, int? commandTimeout)
-        {
-            return await _dapper.GetAsync<T>(Connection, id, _transaction, commandTimeout);
-        }
-
-        public async virtual void Insert<T>(IEnumerable<T> entities, IDbTransaction transaction, int? commandTimeout)
-        {
-            await _dapper.InsertAsync(Connection, entities, transaction, commandTimeout);
-        }
-
-        public async virtual void Insert<T>(IEnumerable<T> entities, int? commandTimeout)
-        {
-            await _dapper.InsertAsync(Connection, entities, _transaction, commandTimeout);
-        }
-
-        public async virtual Task<dynamic> Insert<T>(T entity, IDbTransaction transaction, int? commandTimeout)
-        {
-            return await _dapper.InsertAsync(Connection, entity, transaction, commandTimeout);
-        }
-
-        public async virtual Task<dynamic> Insert<T>(T entity, int? commandTimeout)
-        {
-            return await _dapper.InsertAsync(Connection, entity, _transaction, commandTimeout);
-        }
-
-        public async virtual Task<bool> Update<T>(T entity, IDbTransaction transaction, int? commandTimeout, bool ignoreAllKeyProperties)
-        {
-            return await _dapper.UpdateAsync(Connection, entity, transaction, commandTimeout, ignoreAllKeyProperties);
-        }
-
-        public async virtual Task<bool> Update<T>(T entity, int? commandTimeout, bool ignoreAllKeyProperties)
-        {
-            return await _dapper.UpdateAsync(Connection, entity, _transaction, commandTimeout, ignoreAllKeyProperties);
-        }
-
-        public async virtual Task<bool> Delete<T>(T? entity, IDbTransaction transaction, int? commandTimeout)
-        {
-            return await _dapper.DeleteAsync(Connection, entity, transaction, commandTimeout);
-        }
-
-        public async virtual Task<bool> Delete<T>(T? entity, int? commandTimeout)
-        {
-            return await _dapper.DeleteAsync(Connection, entity, _transaction, commandTimeout);
-        }
-
-        public async virtual Task<bool> Delete<T>(object? predicate, IDbTransaction transaction, int? commandTimeout)
-        {
-            return await _dapper.DeleteAsync<T>(Connection, predicate, transaction, commandTimeout);
-        }
-
-        public async virtual Task<bool> Delete<T>(object? predicate, int? commandTimeout)
-        {
-            return await _dapper.DeleteAsync<T>(Connection, predicate, _transaction, commandTimeout);
-        }
-
-        public async virtual Task<IEnumerable<T>> GetList<T>(object predicate, IList<ISort> sort, IDbTransaction transaction, int? commandTimeout, bool buffered)
-        {
-            return await _dapper.GetListAsync<T>(Connection, predicate, sort, transaction, commandTimeout, buffered);
-        }
-
-        public async virtual Task<IEnumerable<T>> GetList<T>(object? predicate, IList<ISort> sort, int? commandTimeout, bool buffered)
-        {
-            return await _dapper.GetListAsync<T>(Connection, predicate, sort, _transaction, commandTimeout, buffered);
-        }
-
-        public async virtual Task<IEnumerable<T>> GetPage<T>(object predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction, int? commandTimeout, bool buffered)
-        {
-            return await _dapper.GetPageAsync<T>(Connection, predicate, sort, page, resultsPerPage, transaction, commandTimeout, buffered);
-        }
-
-        public async virtual Task<IEnumerable<T>> GetPage<T>(object? predicate, IList<ISort> sort, int page, int resultsPerPage, int? commandTimeout, bool buffered)
-        {
-            return await _dapper.GetPageAsync<T>(Connection, predicate, sort, page, resultsPerPage, _transaction, commandTimeout, buffered);
-        }
-
-        public async virtual Task<IEnumerable<T>> GetSet<T>(object predicate, IList<ISort> sort, int firstResult, int maxResults, IDbTransaction transaction, int? commandTimeout, bool buffered)
-        {
-            return await _dapper.GetSetAsync<T>(Connection, predicate, sort, firstResult, maxResults, transaction, commandTimeout, buffered);
-        }
-
-        public async virtual Task<IEnumerable<T>> GetSet<T>(object predicate, IList<ISort> sort, int firstResult, int maxResults, int? commandTimeout, bool buffered)
-        {
-            return await _dapper.GetSetAsync<T>(Connection, predicate, sort, firstResult, maxResults, _transaction, commandTimeout, buffered);
-        }
-
-        public async virtual Task<int> Count<T>(object predicate, IDbTransaction transaction, int? commandTimeout)
+        public virtual async Task<int> CountAsync<T>(object predicate, IDbTransaction? transaction = null, int? commandTimeout = null)
         {
             return await _dapper.CountAsync<T>(Connection, predicate, transaction, commandTimeout);
         }
 
-        public async virtual Task<int> Count<T>(object? predicate, int? commandTimeout)
+        public virtual async Task<T?> FindAsync<T>(object predicate, IDbTransaction? transaction = null, int? commandTimeout = null)
         {
-            return await _dapper.CountAsync<T>(Connection, predicate, _transaction, commandTimeout);
+            return await _dapper.FindAsync<T>(Connection, predicate, transaction, commandTimeout);
         }
 
-        public async virtual Task<IMultipleResultReader> GetMultiple(GetMultiplePredicate predicate, IDbTransaction transaction, int? commandTimeout)
+        public virtual async Task<T?> GetAsync<T>(dynamic id, IDbTransaction? transaction = null, int? commandTimeout = null)
+        {
+            return await _dapper.GetAsync<T>(Connection, id, transaction, commandTimeout);
+        }
+
+        public virtual async Task<dynamic> InsertAsync<T>(T entity, IDbTransaction? transaction = null, int? commandTimeout = null)
+        {
+            return await _dapper.InsertAsync(Connection, entity, transaction, commandTimeout);
+        }
+
+        public virtual async Task<int> UpdateAsync<T>(T entity, IDbTransaction? transaction = null, int? commandTimeout = null,
+            bool ignoreAllKeyProperties = false)
+        {
+            return await _dapper.UpdateAsync(Connection, entity, transaction, commandTimeout);
+        }
+
+        public virtual async Task<bool> DeleteAsync<T>(T? entity, IDbTransaction? transaction = null, int? commandTimeout = null)
+        {
+            return await _dapper.DeleteAsync(Connection, entity, transaction, commandTimeout);
+        }
+
+        public virtual async Task<bool> DeleteAsync<T>(object? predicate, IDbTransaction? transaction = null, int? commandTimeout = null)
+        {
+            return await _dapper.DeleteAsync(Connection, predicate, transaction, commandTimeout);
+        }
+
+        public virtual async Task<IEnumerable<T>> ListAsync<T>(object? predicate = null, IList<ISort>? sort = null, IDbTransaction? transaction = null,
+            int? commandTimeout = null/*, bool buffered = true*/)
+        {
+            return await _dapper.ListAsync<T>(Connection, predicate, sort, transaction, commandTimeout);
+        }
+
+        public virtual async Task<IEnumerable<T>> PageAsync<T>(object? predicate = null, IList<ISort>? sort = null, int page = 1, int resultsPerPage = 1000,
+            IDbTransaction? transaction = null, int? commandTimeout = null/*, bool buffered = true*/)
+        {
+            return await _dapper.PageAsync<T>(Connection, predicate, sort, page, resultsPerPage, transaction, commandTimeout);
+        }
+
+        public virtual async Task<IMultipleResultReader> GetMultipleAsync(GetMultiplePredicate predicate, IDbTransaction? transaction = null, int? commandTimeout = null)
         {
             return await _dapper.GetMultipleAsync(Connection, predicate, transaction, commandTimeout);
         }
 
-        public async virtual Task<IMultipleResultReader> GetMultiple(GetMultiplePredicate predicate, int? commandTimeout)
-        {
-            return await _dapper.GetMultipleAsync(Connection, predicate, _transaction, commandTimeout);
-        }
-
-        public async virtual Task<Guid> GetNextGuid()
+        public virtual async Task<Guid> GetNextGuidAsync()
         {
             return await Task.FromResult(_dapper.SqlGenerator.Configuration.GetNextGuid());
         }
 
-        public async virtual Task<IClassMapper> GetMap<T>()
+        public virtual async Task<IClassMapper> GetMapAsync<T>()
         {
             return await Task.FromResult(_dapper.SqlGenerator.Configuration.GetMap<T>());
         }
 
         public virtual void ClearCache()
         {
-            ClearCache(_dapper);
+            throw new NotImplementedException("This needs to be uncommented");
+            //ClearCache(_dapper);
         }
     }
-    #endregion
+
+    #endregion Implementation
 }

@@ -20,7 +20,7 @@ namespace DapperExtensions
         Type GetMapType(Type entityType);
         void ClearCache();
         Guid GetNextGuid();
-        SqlInjection GetOrSetSqlInjection(Type entityType, SqlInjection sqlInjection = null);
+        SqlInjection GetOrSetSqlInjection(Type entityType, SqlInjection? sqlInjection = null);
 
         bool CaseSensitiveSearchEnabled { get; }
         void SetCaseSensitiveSearch(bool value);
@@ -118,7 +118,7 @@ namespace DapperExtensions
             return result ?? getType(entityType.Assembly);
         }
 
-        public SqlInjection GetOrSetSqlInjection(Type entityType, SqlInjection sqlInjection = null)
+        public SqlInjection GetOrSetSqlInjection(Type entityType, SqlInjection? sqlInjection = null)
         {
             if (!_sqlInjections.TryGetValue(entityType, out SqlInjection value) && sqlInjection != null)
             {

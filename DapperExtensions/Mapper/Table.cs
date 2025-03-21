@@ -15,7 +15,6 @@ namespace DapperExtensions.Mapper
         public Type ParentEntityType { get; set; }
         public PropertyInfo PropertyInfo { get; set; }
         public bool IsVirtual { get; set; }
-        public IClassMapper ClassMapper { get; set; }
+        public IClassMapper? ClassMapper { get; set; }
     }
 }
-

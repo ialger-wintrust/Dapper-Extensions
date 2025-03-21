@@ -138,41 +138,41 @@ namespace DapperExtensions.xUnitTest.Sql
 
         public class GetIdentitySqlMethod : SqlServerDialectFixtureBase
         {
-            [Fact]
-            public void nullTableIdentity_ShouldReturnABigIntCastedScopeIdentitySql()
-            {
-                var expectedIdentitySql = "SELECT CAST(SCOPE_IDENTITY() AS BIGINT) AS [Id]";
+            //[Fact]
+            //public void nullTableIdentity_ShouldReturnABigIntCastedScopeIdentitySql()
+            //{
+            //    var expectedIdentitySql = "SELECT CAST(SCOPE_IDENTITY() AS BIGINT) AS [Id]";
 
-                var result = Dialect.GetIdentitySql(null);
-                Assert.Equal(expectedIdentitySql, result);
-            }
+            //    var result = Dialect.GetIdentitySql(null);
+            //    Assert.Equal(expectedIdentitySql, result);
+            //}
 
-            [Fact]
-            public void LongTableIdentity_ShouldReturnABigIntCastedScopeIdentitySql()
-            {
-                var expectedIdentitySql = "SELECT CAST(SCOPE_IDENTITY() AS BIGINT) AS [Id]";
+            //[Fact]
+            //public void LongTableIdentity_ShouldReturnABigIntCastedScopeIdentitySql()
+            //{
+            //    var expectedIdentitySql = "SELECT CAST(SCOPE_IDENTITY() AS BIGINT) AS [Id]";
 
-                var result = Dialect.GetIdentitySql(typeof(long));
-                Assert.Equal(expectedIdentitySql, result);
-            }
+            //    var result = Dialect.GetIdentitySql(typeof(long));
+            //    Assert.Equal(expectedIdentitySql, result);
+            //}
 
-            [Fact]
-            public void ShortTableIdentity_ShouldReturnASmallIntCastedScopeIdentitySql()
-            {
-                var expectedIdentitySql = "SELECT CAST(SCOPE_IDENTITY() AS SMALLINT) AS [Id]";
+            //[Fact]
+            //public void ShortTableIdentity_ShouldReturnASmallIntCastedScopeIdentitySql()
+            //{
+            //    var expectedIdentitySql = "SELECT CAST(SCOPE_IDENTITY() AS SMALLINT) AS [Id]";
 
-                var result = Dialect.GetIdentitySql(typeof(short));
-                Assert.Equal(expectedIdentitySql, result);
-            }
+            //    var result = Dialect.GetIdentitySql(typeof(short));
+            //    Assert.Equal(expectedIdentitySql, result);
+            //}
 
-            [Fact]
-            public void IntTableIdentity_ShouldReturnAnIntCastedScopeIdentitySql()
-            {
-                var expectedIdentitySql = "SELECT CAST(SCOPE_IDENTITY() AS INT) AS [Id]";
+            //[Fact]
+            //public void IntTableIdentity_ShouldReturnAnIntCastedScopeIdentitySql()
+            //{
+            //    var expectedIdentitySql = "SELECT CAST(SCOPE_IDENTITY() AS INT) AS [Id]";
 
-                var result = Dialect.GetIdentitySql(typeof(int));
-                Assert.Equal(expectedIdentitySql, result);
-            }
+            //    var result = Dialect.GetIdentitySql(typeof(int));
+            //    Assert.Equal(expectedIdentitySql, result);
+            //}
         }
     }
 }
