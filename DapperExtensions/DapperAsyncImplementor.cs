@@ -1,12 +1,9 @@
-﻿using Dapper;
-using DapperExtensions.Mapper;
+﻿using DapperExtensions.Mapper;
 using DapperExtensions.Predicate;
 using DapperExtensions.Sql;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper = Slapper.AutoMapper;
 
 namespace DapperExtensions
 {

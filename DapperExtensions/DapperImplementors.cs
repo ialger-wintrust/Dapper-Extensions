@@ -248,14 +248,42 @@ public abstract class DapperImplementors
             }
         }
 
-        return SqlGenerator.Insert(classMap, entity);
+        var sql = SqlGenerator.Insert<T>(classMap);
+
+        //  public DynamicParameters GetDynamicParameters<T>(IClassMapper classMap, T entity, bool useColumnAlias = false, bool excludeIdentityKeys = false)
+        var dynamicParameters = GetDynamicParameters(classMap, entity, true);
+
+        var dbDapperCommand = new DbDapperCommand
+        {
+            SqlString = sql,
+            DynamicParameters = dynamicParameters
+        };
+
+        LastExecutedCommand = dbDapperCommand;
+
+        return dbDapperCommand;
     }
 
     protected DbDapperCommand UpdateCommand<T>(T entity)
     {
         var classMap = SqlGenerator.Configuration.GetMap<T>();
         var wherePredicate = GetKeyPredicate(classMap, entity);
-        return SqlGenerator.Update(classMap, entity, wherePredicate);
+
+        var parameters = new Dictionary<string, object>();
+        var sql = SqlGenerator.Update(classMap, entity, wherePredicate, parameters);
+
+        var dynamicParameters = GetDynamicParameters(classMap, entity, true, true);
+        dynamicParameters.AddDynamicParams(GetDynamicParameters(parameters));
+
+        var dbDapperCommand = new DbDapperCommand
+        {
+            SqlString = sql,
+            DynamicParameters = dynamicParameters
+        };
+
+        LastExecutedCommand = dbDapperCommand;
+
+        return dbDapperCommand;
     }
 
     protected static IPredicate? GetEntityPredicate(IClassMapper classMap, object? entity)
@@ -295,9 +323,7 @@ public abstract class DapperImplementors
 
         if (excludeIdentityKeys)
         {
-            var identityColumns = classMap.Properties.Where(item => item.KeyType is KeyType.Identity
-                or KeyType.Assigned
-                or KeyType.SequenceIdentity).ToList();
+            var identityColumns = classMap.Properties.Where(item => item.KeyType is KeyType.Identity or KeyType.SequenceIdentity).ToList();
 
             if (identityColumns?.Count > 1)
             {
@@ -323,7 +349,7 @@ public abstract class DapperImplementors
         return dynamicParameters;
     }
 
-    protected virtual DynamicParameters AddParameter<T>(T entity, DynamicParameters parameters, IMemberMap prop, bool useColumnAlias = false)
+    protected DynamicParameters AddParameter<T>(T entity, DynamicParameters parameters, IMemberMap prop, bool useColumnAlias = false)
     {
         var propValue = prop.GetValue(entity);
         var parameter = ReflectionHelper.GetParameter(typeof(T), SqlGenerator, prop.Name, propValue);
@@ -332,8 +358,8 @@ public abstract class DapperImplementors
         if (useColumnAlias)
         {
             var alias = SqlGenerator.AllColumns
-                .SingleOrDefault(c => c.Alias.Equals(parameter.Name, StringComparison.InvariantCultureIgnoreCase))
-                ?.SimpleAlias ?? string.Empty;
+                .FirstOrDefault(c => string.Equals(c.Name, name, StringComparison.InvariantCultureIgnoreCase))
+                ?.SimpleAlias;
 
             if (!string.IsNullOrEmpty(alias))
             {
@@ -553,7 +579,7 @@ public abstract class DapperImplementors
 
     protected static IPredicate? GetKeyPredicate<T>(IClassMapper classMap, T? entity)
     {
-        var whereFields = classMap.Properties?.Where(p => p.KeyType != KeyType.NotAKey && p.KeyType != KeyType.ForeignKey).ToList();
+        var whereFields = classMap.Properties?.Where(p => p.KeyType == KeyType.Identity && p.KeyType != KeyType.ForeignKey).ToList();
 
         if (whereFields == null || !whereFields.Any())
         {
@@ -568,6 +594,7 @@ public abstract class DapperImplementors
             fieldPredicate!.Operator = Operator.Eq;
             fieldPredicate.PropertyName = field.Name;
             fieldPredicate.Value = field.GetValue(entity);
+            fieldPredicate.UseTableAlias = true;
             predicates.Add(fieldPredicate);
         }
 

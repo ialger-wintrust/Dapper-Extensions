@@ -1,12 +1,10 @@
-﻿using Azure;
-using DapperExtensions.Mapper;
+﻿using DapperExtensions.Mapper;
 using DapperExtensions.Predicate;
 using DapperExtensions.Sql;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
-using static Slapper.AutoMapper;
 
 namespace DapperExtensions
 {

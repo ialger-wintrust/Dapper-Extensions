@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
-using DapperExtensions.Mapper;
 
 namespace DapperExtensions.Sql.Dialects
 {

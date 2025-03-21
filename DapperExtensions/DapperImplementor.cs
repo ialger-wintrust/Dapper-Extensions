@@ -3,15 +3,8 @@ using DapperExtensions.Mapper;
 using DapperExtensions.Predicate;
 using DapperExtensions.Sql;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Dynamic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Reflection.Emit;
-using static Dapper.SqlMapper;
 
 namespace DapperExtensions
 {
@@ -154,7 +147,7 @@ namespace DapperExtensions
         public int Update<T>(IDbConnection connection, T entity, IDbTransaction? transaction, int? commandTimeout)
         {
             var dapperCommand = UpdateCommand<T>(entity);
-
+            var t = dapperCommand.ToString();
             return connection.Execute(dapperCommand.SqlString, dapperCommand.DynamicParameters, transaction, commandTimeout, CommandType.Text);
         }
 

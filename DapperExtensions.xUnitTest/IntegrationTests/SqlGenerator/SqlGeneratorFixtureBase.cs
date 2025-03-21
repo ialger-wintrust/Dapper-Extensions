@@ -1,6 +1,5 @@
 ﻿using DapperExtensions.Mapper;
 using DapperExtensions.Predicate;
-using DapperExtensions.Sql;
 using DapperExtensions.Sql.Dialects;
 using Moq;
 

@@ -1,7 +1,6 @@
 ﻿using DapperExtensions.Predicate;
 using DapperExtensions.xUnitTest.Data.Common;
 using DapperExtensions.xUnitTest.Helpers;
-using static Slapper.AutoMapper;
 
 namespace DapperExtensions.xUnitTest.IntegrationTests.SqlServer;
 

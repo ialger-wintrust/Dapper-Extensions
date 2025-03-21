@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using DapperExtensions.Mapper;
 using DapperExtensions.Predicate;
 
 namespace DapperExtensions.Sql.Dialects
