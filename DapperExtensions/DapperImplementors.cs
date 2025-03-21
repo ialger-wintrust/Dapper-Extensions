@@ -429,7 +429,7 @@ public abstract class DapperImplementors
         var dictionary = new Dictionary<string, object>();
         foreach (KeyValuePair<string, object> kvp in d)
         {
-            var alias = GetColumnAliasFromSimpleAlias(kvp.Key);
+            var alias = GetColumnAlias(kvp.Key);
             if (!string.IsNullOrEmpty(alias))
                 dictionary.Add(alias, kvp.Value);
         }
@@ -438,11 +438,20 @@ public abstract class DapperImplementors
     }
 
     // TODO this needs to be re evaluated. Right now we can only work with singular objects we will want to be able to work with bulk objects at some point in time.
-    protected string GetColumnAliasFromSimpleAlias(string simpleAlias)
+    protected string GetColumnAlias(string columnKey)
     {
-        return SqlGenerator.AllColumns.Any(c => c.SimpleAlias.Equals(simpleAlias, StringComparison.InvariantCultureIgnoreCase))
-            ? SqlGenerator.AllColumns.Where(c => c.SimpleAlias.Equals(simpleAlias, StringComparison.InvariantCultureIgnoreCase)).Select(c => c.Name).Single()
-            : string.Empty;
+        var columnName = SqlGenerator.AllColumns.FirstOrDefault(c =>
+            string.Equals(c.Name, columnKey, StringComparison.InvariantCultureIgnoreCase))?.Name;
+
+        if (string.IsNullOrEmpty(columnName))
+        {
+            columnName = SqlGenerator.AllColumns.FirstOrDefault(c =>
+                string.Equals(c.SimpleAlias, columnKey, StringComparison.InvariantCultureIgnoreCase))?.Name;
+        }
+
+        ArgumentException.ThrowIfNullOrEmpty(columnName, nameof(columnName));
+
+        return columnName;
     }
 
     private static IPredicate? GetIdPredicate(IClassMapper classMap, object? id)

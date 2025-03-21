@@ -99,7 +99,7 @@ namespace DapperExtensions.Sql
             AllColumns = GetColumns().ToList();
 
             var selectColumns = string.Join(", ", AllColumns.Select(c => c.Name));
-            var tableName = GetTableName(classMap);
+            var tableName = GetTableName(classMap, true);
 
             var sql = new StringBuilder($"Select {selectColumns} From {tableName}");
 

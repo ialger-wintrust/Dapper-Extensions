@@ -46,6 +46,7 @@ namespace DapperExtensions.Mapper
             SimpleAlias = simpleAlias;
             Property = property;
             ClassMapper = property.ClassMapper;
+            TableIdentity = table.Identity;
             Table = table;
         }
     }
