@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>net8.0</TargetFrameworks>
-		<Version>1.7.1</Version>
+		<Version>2.0.0</Version>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
@@ -28,7 +28,7 @@
 		<Copyright>Thad Smith, Page Brooks</Copyright>
 		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 		<RepositoryType>git</RepositoryType>
-		<RepositoryUrl>https://github.com/tmsmith/Dapper-Extensions.git</RepositoryUrl>
+		<RepositoryUrl>https://github.com/ialger-wintrust/Dapper-Extensions.git</RepositoryUrl>
 		<PackageReleaseNotes>
 			1.7.1
 			* Fixed issue with Inserts needing to be type long
