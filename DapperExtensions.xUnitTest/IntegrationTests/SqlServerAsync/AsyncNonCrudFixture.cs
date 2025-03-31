@@ -5,9 +5,9 @@ using DapperExtensions.Mapper;
 using DapperExtensions.Test.Entities;
 using DapperExtensions.Test.Maps;
 
-namespace DapperExtensions.xUnitTest.IntegrationTests
+namespace DapperExtensions.xUnitTest.IntegrationTests.Async
 {
-    public static class NonCrudFixture
+    public static class NonCrudAsyncFixture
     {
         public class GetNextGuidMethod
         {
@@ -17,7 +17,7 @@ namespace DapperExtensions.xUnitTest.IntegrationTests
                 var list = new List<Guid>();
                 for (var i = 0; i < 1000; i++)
                 {
-                    var id = DapperExtensions.GetNextGuid();
+                    var id = DapperAsyncExtensions.GetNextGuid().Result;
                     Assert.False(list.Contains(id));
                     list.Add(id);
                 }
@@ -29,33 +29,33 @@ namespace DapperExtensions.xUnitTest.IntegrationTests
             [Fact]
             public void NoMappingClass_ReturnsDefaultMapper()
             {
-                var mapper = DapperExtensions.GetMap<EntityWithoutMapper>();
+                var mapper = DapperAsyncExtensions.GetMap<EntityWithoutMapper>().Result;
                 Assert.Equal(typeof(AutoClassMapper<EntityWithoutMapper>), mapper.GetType());
             }
 
             [Fact]
             public void ClassMapperDescendant_Returns_DefinedClass()
             {
-                var mapper = DapperExtensions.GetMap<EntityWithMapper>();
+                var mapper = DapperAsyncExtensions.GetMap<EntityWithMapper>().Result;
                 Assert.Equal(typeof(EntityWithMapperMapper), mapper.GetType());
             }
 
             [Fact]
             public void ClassMapperInterface_Returns_DefinedMapper()
             {
-                var mapper = DapperExtensions.GetMap<EntityWithInterfaceMapper>();
+                var mapper = DapperAsyncExtensions.GetMap<EntityWithInterfaceMapper>().Result;
                 Assert.Equal(typeof(EntityWithInterfaceMapperMapper), mapper.GetType());
             }
 
             [Fact]
             public void MappingClass_ReturnsFromDifferentAssembly()
             {
-                DapperExtensions.SetMappingAssemblies(new[] { typeof(ExternallyMappedMap).Assembly });
-                var mapper = DapperExtensions.GetMap<ExternallyMapped>();
+                DapperAsyncExtensions.SetMappingAssemblies(new[] { typeof(ExternallyMappedMap).Assembly });
+                var mapper = DapperAsyncExtensions.GetMap<ExternallyMapped>().Result;
                 Assert.Equal(typeof(ExternallyMappedMap.ExternallyMappedMapper), mapper.GetType());
 
-                DapperExtensions.SetMappingAssemblies(null);
-                mapper = DapperExtensions.GetMap<ExternallyMapped>();
+                DapperAsyncExtensions.SetMappingAssemblies(null);
+                mapper = DapperAsyncExtensions.GetMap<ExternallyMapped>().Result;
                 Assert.Equal(typeof(AutoClassMapper<ExternallyMapped>), mapper.GetType());
             }
 
@@ -124,29 +124,6 @@ namespace DapperExtensions.xUnitTest.IntegrationTests
                 {
                     throw new NotImplementedException();
                 }
-            }
-        }
-
-        public class ConfigurationMethods
-        {
-            [Fact]
-            public void SetCaseSensitiveSearch_True_ChangesCaseSensitiveSearchEnabled()
-            {
-                var config = new DapperExtensionsConfiguration();
-
-                config.SetCaseSensitiveSearch(true);
-
-                Assert.True(config.CaseSensitiveSearchEnabled);
-            }
-
-            [Fact]
-            public void SetCaseSensitiveSearch_False_ChangesCaseSensitiveSearchEnabled()
-            {
-                var config = new DapperExtensionsConfiguration();
-
-                config.SetCaseSensitiveSearch(false);
-
-                Assert.False(config.CaseSensitiveSearchEnabled);
             }
         }
     }

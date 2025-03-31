@@ -8,6 +8,19 @@ namespace DapperExtensions.xUnitTest.IntegrationTests.SqlServer;
 public class ListMethodTest : SqlServerBaseFixture
 {
     [Fact]
+    public void ListUsingExtensionInvocation_ShouldReturnAll()
+    {
+        Db.Insert(new Person { Active = true, FirstName = "a", LastName = "a1", DateCreated = DateTime.UtcNow });
+        Db.Insert(new Person { Active = false, FirstName = "b", LastName = "b1", DateCreated = DateTime.UtcNow });
+        Db.Insert(new Person { Active = true, FirstName = "c", LastName = "c1", DateCreated = DateTime.UtcNow });
+        Db.Insert(new Person { Active = false, FirstName = "d", LastName = "d1", DateCreated = DateTime.UtcNow });
+
+        var list = Db.Connection.List<Person>();
+        Assert.NotNull(list);
+        Assert.Equal(4, list.Count());
+    }
+
+    [Fact]
     public void UsingNullPredicate_ReturnsAll()
     {
         Db.Insert(new Person { Active = true, FirstName = "a", LastName = "a1", DateCreated = DateTime.UtcNow });

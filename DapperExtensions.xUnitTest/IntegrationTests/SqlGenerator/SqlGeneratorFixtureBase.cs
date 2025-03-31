@@ -1,31 +1,35 @@
 ﻿using DapperExtensions.Mapper;
 using DapperExtensions.Predicate;
+using DapperExtensions.Sql;
 using DapperExtensions.Sql.Dialects;
 using Moq;
+using System.Reflection;
 
 namespace DapperExtensions.xUnitTest.IntegrationTests.SqlGenerator
 {
     public abstract class SqlGeneratorFixtureBase
     {
-        public SqlGeneratorFixtureBase()
-        {
-            Setup();
-        }
-
         protected Mock<IDapperExtensionsConfiguration> Configuration;
         protected Mock<ISqlDialect> Dialect;
-        protected Mock<IClassMapper> ClassMap;
-        protected Mock<IList<IProjection>?> Projections;
 
-        public void Setup()
+        protected Mock<IClassMapper> ClassMap;
+        protected Mock<IList<IProjection>> Projections;
+
+        protected SqlGeneratorImpl Generator;
+
+        protected SqlGeneratorFixtureBase()
         {
             Configuration = new Mock<IDapperExtensionsConfiguration>();
             Dialect = new Mock<ISqlDialect>();
             ClassMap = new Mock<IClassMapper>();
-            Projections = new Mock<IList<IProjection>?>();
+            Projections = new Mock<IList<IProjection>>();
 
             Dialect.SetupGet(c => c.ParameterPrefix).Returns('@');
             Configuration.SetupGet(c => c.Dialect).Returns(Dialect.Object).Verifiable();
+
+            var config = new DapperExtensionsConfiguration(typeof(AutoClassMapper<>), new List<Assembly>(), new SqlServerDialect());
+
+            Generator = new SqlGeneratorImpl(config);
         }
     }
 

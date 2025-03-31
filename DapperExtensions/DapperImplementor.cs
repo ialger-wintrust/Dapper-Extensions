@@ -32,7 +32,7 @@ namespace DapperExtensions
 
         bool Delete<T>(IDbConnection connection, T entity, IDbTransaction? transaction = null, int? commandTimeout = null);
 
-        bool Delete<T>(IDbConnection connection, object predicate, IDbTransaction? transaction = null, int? commandTimeout = null);
+        int Delete<T>(IDbConnection connection, object predicate, IDbTransaction? transaction = null, int? commandTimeout = null);
 
         //TOut? GetPartial<TIn, TOut>(IDbConnection connection, Expression<Func<TIn, TOut>> func, dynamic id, IDbTransaction? transaction = null, int? commandTimeout = null, IList<IReferenceMap>? includedProperties = null) where TIn : class where TOut : class;
 
@@ -157,10 +157,10 @@ namespace DapperExtensions
             return connection.Execute(dapperCommand.SqlString, dapperCommand.DynamicParameters, transaction, commandTimeout, CommandType.Text) > 0;
         }
 
-        public bool Delete<T>(IDbConnection connection, object predicate, IDbTransaction? transaction, int? commandTimeout)
+        public int Delete<T>(IDbConnection connection, object predicate, IDbTransaction? transaction, int? commandTimeout)
         {
             var dapperCommand = DeleteCommand<T>(predicate);
-            return connection.Execute(dapperCommand.SqlString, dapperCommand.DynamicParameters, transaction, commandTimeout, CommandType.Text) > 0;
+            return connection.Execute(dapperCommand.SqlString, dapperCommand.DynamicParameters, transaction, commandTimeout, CommandType.Text);
         }
 
         //public DynamicParameters GetDynamicParameters<T>(IClassMapper classMap, T? entity, bool useColumnAlias = false)

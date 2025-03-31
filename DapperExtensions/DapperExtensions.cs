@@ -16,6 +16,7 @@ namespace DapperExtensions
         private static Func<IDapperExtensionsConfiguration, IDapperImplementor> _instanceFactory;
         private static IDapperImplementor _instance;
         private static IDapperExtensionsConfiguration _configuration;
+        private static readonly Dictionary<Type, IList<IProjection>> ColsBuffer = new Dictionary<Type, IList<IProjection>>();
 
         /// <summary>
         /// Gets or sets the default class mapper to use when generating class maps. If not specified, AutoClassMapper<T> is used.
@@ -58,6 +59,12 @@ namespace DapperExtensions
             return _configuration.GetOrSetSqlInjection(entityType, sqlInjection);
         }
 
+        public static bool CaseSensitiveSearch
+        {
+            get => _configuration.CaseSensitiveSearchEnabled;
+            set => _configuration.SetCaseSensitiveSearch(value);
+        }
+
         /// <summary>
         /// Gets the Dapper Extensions Implementation
         /// </summary>
@@ -83,9 +90,7 @@ namespace DapperExtensions
         /// <summary>
         /// Configure DapperExtensions extension methods.
         /// </summary>
-        /// <param name="defaultMapper"></param>
-        /// <param name="mappingAssemblies"></param>
-        /// <param name="sqlDialect"></param>
+        /// <param name="configuration"></param>
         public static void Configure(this IDapperExtensionsConfiguration configuration)
         {
             _instance = null;
@@ -120,7 +125,7 @@ namespace DapperExtensions
         /// <summary>
         /// Executes a query using the specified predicate, returning an integer that represents the number of rows that match the query.
         /// </summary>
-        public static int Count<T>(this IDbConnection connection, object? predicate, IDbTransaction? transaction = null, int? commandTimeout = null)
+        public static int Count<T>(this IDbConnection connection, object? predicate = null, IDbTransaction? transaction = null, int? commandTimeout = null)
         {
             return Instance.Count<T>(connection, predicate, transaction, commandTimeout);
         }
@@ -147,7 +152,7 @@ namespace DapperExtensions
         /// If the entity has a composite key, an IDictionary&lt;string, object&gt; is returned with the key values.
         /// The key value for the entity will also be updated if the KeyType is a Guid or Identity.
         /// </summary>
-        public static dynamic Insert<T>(this IDbConnection connection, T entity, IDbTransaction? transaction = null, int? commandTimeout = null)
+        public static T Insert<T>(this IDbConnection connection, T entity, IDbTransaction? transaction = null, int? commandTimeout = null)
         {
             return Instance.Insert(connection, entity, transaction, commandTimeout);
         }
@@ -171,7 +176,7 @@ namespace DapperExtensions
         /// <summary>
         /// Executes a delete query using the specified predicate.
         /// </summary>
-        public static bool Delete<T>(this IDbConnection connection, object? predicate, IDbTransaction? transaction = null, int? commandTimeout = null)
+        public static int Delete<T>(this IDbConnection connection, object predicate, IDbTransaction? transaction = null, int? commandTimeout = null)
         {
             return Instance.Delete<T>(connection, predicate, transaction, commandTimeout);
         }
@@ -180,7 +185,7 @@ namespace DapperExtensions
         /// Executes a select query using the specified predicate, returning an IEnumerable data typed as per T.
         /// Data returned is dependent upon the specified page and resultsPerPage.
         /// </summary>
-        public static IEnumerable<T>? List<T>(this IDbConnection connection, object? predicate, IList<ISort> sort, IDbTransaction? transaction = null, int? commandTimeout = null/*, bool buffered = false*/)
+        public static IEnumerable<T>? List<T>(this IDbConnection connection, object? predicate = null, IList<ISort>? sort = null, IDbTransaction? transaction = null, int? commandTimeout = null/*, bool buffered = false*/)
         {
             return Instance.List<T>(connection, predicate, sort, transaction, commandTimeout);
         }

@@ -15,14 +15,21 @@ namespace DapperExtensions
         Type DefaultMapper { get; }
         IList<Assembly> MappingAssemblies { get; }
         ISqlDialect Dialect { get; }
+
         IClassMapper GetMap(Type entityType);
+
         IClassMapper GetMap<T>();
-        Type GetMapType(Type entityType);
+
+        Type? GetMapType(Type entityType);
+
         void ClearCache();
+
         Guid GetNextGuid();
+
         SqlInjection GetOrSetSqlInjection(Type entityType, SqlInjection? sqlInjection = null);
 
         bool CaseSensitiveSearchEnabled { get; }
+
         void SetCaseSensitiveSearch(bool value);
     }
 
@@ -89,33 +96,89 @@ namespace DapperExtensions
             return new Guid(b);
         }
 
-        public virtual Type GetMapType(Type entityType)
+        public virtual Type? GetMapType(Type entityType)
         {
-            Type getType(Assembly a)
-            {
-                var types = a.GetTypes();
+            var assemblies = new List<Assembly>();
+            assemblies.Add(entityType.Assembly);
+            assemblies.AddRange(MappingAssemblies);
 
-                //Order by to assure that direct implementaion comes first
-                //FirstOrDefault to avoid inheritance problems
-                return (from type in types
-                        let interfaceType = type.GetInterface(typeof(IClassMapper<>).FullName)
-                        where
-                            interfaceType != null &&
-                            (interfaceType.GetGenericArguments()[0] == entityType || interfaceType.GetGenericArguments()[0] == entityType?.BaseType)
-                        orderby interfaceType.GetGenericArguments()[0] == entityType descending
-                        select type).FirstOrDefault();
+            //Type? getType(Assembly a)
+            //{
+            //    var types = a.GetTypes();
+
+            //    //Order by to assure that direct implementaion comes first
+            //    //FirstOrDefault to avoid inheritance problems
+            //    return (from type in types
+            //            let interfaceType = type.GetInterface(typeof(IClassMapper<>)?.FullName)
+            //            where
+            //                interfaceType != null &&
+            //                (interfaceType.GetGenericArguments()[0] == entityType || interfaceType.GetGenericArguments()[0] == entityType?.BaseType)
+            //            orderby interfaceType.GetGenericArguments()[0] == entityType descending
+            //            select type).FirstOrDefault();
+            //}
+
+            //var result = getType(entityType.Assembly);
+            //if (result != null)
+            //{
+            //    return result;
+            //}
+
+            //for (var i = 0; i < MappingAssemblies.Count && result == null; i++)
+            //{
+            //    result = getType(MappingAssemblies[i]);
+
+            //    if (result != null)
+            //    {
+            //        return result;
+            //    }
+            //}
+
+            foreach (var assembly in assemblies)
+            {
+                var types = assembly.GetTypes();
+
+                var mappedType = types
+                    .Where(type =>
+                    {
+                        var typeName = type.FullName;
+                        var interfaceType = type.GetInterface(typeof(IClassMapper<>)?.FullName) ??
+                                            type.GetInterface(typeof(ClassMapper<>)?.FullName);
+
+                        if (interfaceType == null)
+                        {
+                            return false;
+                        }
+
+                        var genericArgumentType = interfaceType.GetGenericArguments().FirstOrDefault();
+
+                        return genericArgumentType == entityType || genericArgumentType == entityType?.BaseType;
+                    })
+                    .OrderByDescending(type => type.GetGenericArguments().FirstOrDefault() == entityType)
+                    .FirstOrDefault();
+
+
+                //var mappedType = types
+                //    .Select(type =>
+                //    {
+                //        var interfaceType = type.GetInterface(typeof(IClassMapper<>)?.FullName) ?? type.GetInterface(typeof(ClassMapper<>)?.FullName);
+
+                //        return new { type, interfaceType };
+                //    })
+                //    .Where(@t => @t.interfaceType != null
+                //                 && (
+                //                     @t.interfaceType.GetGenericArguments()[0] == entityType
+                //                     || @t.interfaceType.GetGenericArguments()[0] == entityType?.BaseType
+                //                )
+                //    )
+                //    .OrderByDescending(@t => @t.interfaceType.GetGenericArguments()[0] == entityType)
+                //    .Select(@t => @t.type).FirstOrDefault();
+                if (mappedType != null)
+                {
+                    return mappedType;
+                }
             }
 
-            var result = getType(entityType.Assembly);
-            if (result != null)
-                return result;
-
-            for (var i = 0; i < MappingAssemblies.Count && result == null; i++)
-            {
-                result = getType(MappingAssemblies[i]);
-            }
-
-            return result ?? getType(entityType.Assembly);
+            return null;
         }
 
         public SqlInjection GetOrSetSqlInjection(Type entityType, SqlInjection? sqlInjection = null)

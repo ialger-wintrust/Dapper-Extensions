@@ -250,7 +250,6 @@ public abstract class DapperImplementors
 
         var sql = SqlGenerator.Insert<T>(classMap);
 
-        //  public DynamicParameters GetDynamicParameters<T>(IClassMapper classMap, T entity, bool useColumnAlias = false, bool excludeIdentityKeys = false)
         var dynamicParameters = GetDynamicParameters(classMap, entity, true);
 
         var dbDapperCommand = new DbDapperCommand

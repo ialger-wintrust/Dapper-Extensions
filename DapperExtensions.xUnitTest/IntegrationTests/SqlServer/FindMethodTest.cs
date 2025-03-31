@@ -1,13 +1,14 @@
-﻿using DapperExtensions.xUnitTest.Data.Common;
+﻿using DapperExtensions.Predicate;
+using DapperExtensions.xUnitTest.Data.Common;
 using DapperExtensions.xUnitTest.Helpers;
 
 namespace DapperExtensions.xUnitTest.IntegrationTests.SqlServer;
 
 [Collection(nameof(NonParallelTestCollection))]
-public class GetMethodTest : SqlServerBaseFixture
+public class FindMethodTest : SqlServerBaseFixture
 {
     [Fact]
-    public void GetByIdUsingExtensionInvocation_ShouldReturnTheCorrectEntity()
+    public void FindByKey_UsingExtensionInvocation_ReturnsEntity()
     {
         var testP1 = new Person
         {
@@ -16,27 +17,18 @@ public class GetMethodTest : SqlServerBaseFixture
             LastName = "Bar",
             DateCreated = DateTime.UtcNow
         };
-        var testP2 = new Person
-        {
-            Active = true,
-            FirstName = "Foo2",
-            LastName = "Bar2",
-            DateCreated = DateTime.UtcNow
-        };
-        var person1 = Db.Insert(testP1);
-        var person2 = Db.Insert(testP2);
 
-        var actualP1 = Db.Connection.Get<Person>(person1.Id);
+        var person1 = Db.Connection.Insert(testP1);
+        var idPredicate = Predicates.Field<Person>(f => f.Id, Operator.Eq, person1.Id);
+        var activePredicate = Predicates.Field<Person>(f => f.Active, Operator.Eq, true);
+
+        var groupPredicate = Predicates.Group(GroupOperator.And, idPredicate, activePredicate);
+
+        var actualP1 = Db.Connection.Find<Person>(groupPredicate);
         Assert.NotNull(actualP1);
         Assert.Equal(person1.Id, actualP1.Id);
         Assert.Equal("Foo", actualP1.FirstName);
         Assert.Equal("Bar", actualP1.LastName);
-
-        var actualP2 = Db.Connection.Get<Person>(person2.Id);
-        Assert.NotNull(actualP2);
-        Assert.Equal(person2.Id, actualP2.Id);
-        Assert.Equal("Foo2", actualP2.FirstName);
-        Assert.Equal("Bar2", actualP2.LastName);
     }
 
     [Fact]
@@ -49,27 +41,18 @@ public class GetMethodTest : SqlServerBaseFixture
             LastName = "Bar",
             DateCreated = DateTime.UtcNow
         };
-        var testP2 = new Person
-        {
-            Active = true,
-            FirstName = "Foo2",
-            LastName = "Bar2",
-            DateCreated = DateTime.UtcNow
-        };
-        var person1 = Db.Insert(testP1);
-        var person2 = Db.Insert(testP2);
 
-        var actualP1 = Db.Get<Person>(person1.Id);
+        var person1 = Db.Insert(testP1);
+        var idPredicate = Predicates.Field<Person>(f => f.Id, Operator.Eq, person1.Id);
+        var activePredicate = Predicates.Field<Person>(f => f.Active, Operator.Eq, true);
+
+        var groupPredicate = Predicates.Group(GroupOperator.And, idPredicate, activePredicate);
+
+        var actualP1 = Db.Find<Person>(groupPredicate);
         Assert.NotNull(actualP1);
         Assert.Equal(person1.Id, actualP1.Id);
         Assert.Equal("Foo", actualP1.FirstName);
         Assert.Equal("Bar", actualP1.LastName);
-
-        var actualP2 = Db.Get<Person>(person2.Id);
-        Assert.NotNull(actualP2);
-        Assert.Equal(person2.Id, actualP2.Id);
-        Assert.Equal("Foo2", actualP2.FirstName);
-        Assert.Equal("Bar2", actualP2.LastName);
     }
 
     [Fact]

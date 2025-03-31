@@ -7,6 +7,14 @@ namespace DapperExtensions.xUnitTest.IntegrationTests.SqlServer;
 public class InsertMethodTest : SqlServerBaseFixture
 {
     [Fact]
+    public void Insert_UsingExtensionInvocation_ShouldAddTheEntityToTheDatabase_ReturningTheInsertedEntity()
+    {
+        var p = new Person { Active = true, FirstName = "Foo", LastName = "Bar", DateCreated = DateTime.UtcNow };
+        var person = Db.Connection.Insert(p);
+        Assert.Equal(1, person.Id);
+    }
+
+    [Fact]
     public void InsertingAnEntityWithAnIdentityKey_ShouldAddTheEntityToTheDatabase_ReturningTheInsertedEntity()
     {
         var p = new Person { Active = true, FirstName = "Foo", LastName = "Bar", DateCreated = DateTime.UtcNow };

@@ -19,6 +19,7 @@ namespace DapperExtensions.Mapper
         public static class Formatting
         {
             private static readonly IList<string> Unpluralizables = new List<string> { "equipment", "information", "rice", "money", "species", "series", "fish", "sheep", "deer" };
+
             private static readonly IDictionary<string, string> Pluralizations = new Dictionary<string, string>
                                                                                      {
                                                                                          // Start with the rarest cases, and move to the most common
@@ -43,6 +44,8 @@ namespace DapperExtensions.Mapper
 
             public static string Pluralize(string singular)
             {
+                singular = singular.ToLower();
+
                 if (Unpluralizables.Contains(singular))
                     return singular;
 
@@ -50,11 +53,12 @@ namespace DapperExtensions.Mapper
 
                 foreach (var pluralization in Pluralizations)
                 {
-                    if (Regex.IsMatch(singular, pluralization.Key))
+                    if (!Regex.IsMatch(singular, pluralization.Key))
                     {
-                        plural = Regex.Replace(singular, pluralization.Key, pluralization.Value);
-                        break;
+                        continue;
                     }
+                    plural = Regex.Replace(singular, pluralization.Key, pluralization.Value);
+                    break;
                 }
 
                 return plural;

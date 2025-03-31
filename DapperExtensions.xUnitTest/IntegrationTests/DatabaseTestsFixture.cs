@@ -2,6 +2,7 @@
 using System.Data.Common;
 using System.Reflection;
 using Dapper;
+using DapperExtensions.Db;
 using DapperExtensions.Mapper;
 using DapperExtensions.Sql;
 using DapperExtensions.Sql.Dialects;
@@ -65,7 +66,6 @@ namespace DapperExtensions.xUnitTest.IntegrationTests
         {
             var namespacePath = $"{GetType().Namespace.Replace($"{projectName}.", "")}";
 
-            //TODO: Understand why projectName comes as "nunit.framework" using release configuration and need to adjust here
             if (!System.Diagnostics.Debugger.IsAttached)
             {
                 foreach (var aux in namespacePath.Split('.'))
@@ -85,6 +85,11 @@ namespace DapperExtensions.xUnitTest.IntegrationTests
             while (namespacePath.Contains("."))
             {
                 namespacePath = namespacePath.Substring(namespacePath.IndexOf(".") + 1);
+            }
+
+            if (namespacePath.EndsWith("Async"))
+            {
+                namespacePath = namespacePath.TrimEnd("Async".ToCharArray());
             }
 
             return $"DDL\\{namespacePath}";

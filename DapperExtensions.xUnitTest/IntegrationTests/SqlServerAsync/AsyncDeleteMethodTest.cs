@@ -2,13 +2,13 @@
 using DapperExtensions.xUnitTest.Data.Common;
 using DapperExtensions.xUnitTest.Helpers;
 
-namespace DapperExtensions.xUnitTest.IntegrationTests.SqlServer;
+namespace DapperExtensions.xUnitTest.IntegrationTests.SqlServerAsync;
 
 [Collection(nameof(NonParallelTestCollection))]
-public class DeleteMethodTest : SqlServerBaseFixture
+public class AsyncDeleteMethodTest : AsyncSqlServerBaseFixture
 {
     [Fact]
-    public void DeleteByKey_UsingExtensionInvocation_DeletesEntityFromTheDatabase()
+    public async Task DeleteByKey_UsingExtensionInvocation_DeletesFromDatabase()
     {
         var p1 = new Person
         {
@@ -18,39 +18,37 @@ public class DeleteMethodTest : SqlServerBaseFixture
             DateCreated = DateTime.UtcNow
         };
 
-        var id = Db.Connection.Insert(p1);
+        var id = await Db.Connection.InsertAsync(p1);
 
-        var p2 = Db.Connection.Get<Person>(id);
-        Db.Connection.Delete(p2);
+        var p2 = await Db.Connection.GetAsync<Person>(id);
+        await Db.Connection.DeleteAsync(p2);
 
-        var deletedPerson = Db.Connection.Get<Person>(id);
+        var deletedPerson = await Db.Connection.GetAsync<Person>(id);
         Assert.Null(deletedPerson);
     }
 
     [Fact]
-    public void DeleteByPredicate_UsingExtensionInvocation_DeletesRows()
+    public async Task DeleteByPredicate_UsingExtensionInvocation_DeletesRows()
     {
         var p1 = new Person { Active = true, FirstName = "Foo", LastName = "Bar", DateCreated = DateTime.UtcNow };
         var p2 = new Person { Active = true, FirstName = "Foo", LastName = "Bar", DateCreated = DateTime.UtcNow };
         var p3 = new Person { Active = true, FirstName = "Foo", LastName = "Barz", DateCreated = DateTime.UtcNow };
-        Db.Connection.Insert(p1);
-        Db.Connection.Insert(p2);
-        Db.Connection.Insert(p3);
+        await Db.Connection.InsertAsync(p1);
+        await Db.Connection.InsertAsync(p2);
+        await Db.Connection.InsertAsync(p3);
 
-        var list = Db.Connection.List<Person>();
+        var list = await Db.Connection.ListAsync<Person>();
         Assert.Equal(3, list.Count());
 
-        IPredicate? pred = Predicates.Field<Person>(p => p.LastName, Operator.Eq, "Bar");
-        var result = Db.Connection.Delete<Person>(pred);
+        var result = await Db.Connection.DeleteAsync<Person>(new { LastName = "Bar" });
         Assert.True(result > 0);
 
-        list = Db.Connection.List<Person>();
-        Assert.NotNull(list);
-        Assert.Equal(1, list.Count());
+        list = await Db.Connection.ListAsync<Person>();
+        Assert.Single(list);
     }
 
     [Fact]
-    public void UsingKey_DeletesFromDatabase()
+    public async Task UsingKey_DeletesFromDatabase()
     {
         var p1 = new Person
         {
@@ -60,64 +58,58 @@ public class DeleteMethodTest : SqlServerBaseFixture
             DateCreated = DateTime.UtcNow
         };
 
-        var id = Db.Insert(p1);
+        var id = await Db.InsertAsync(p1);
 
-        var p2 = Db.Get<Person>(id);
-        Db.Delete(p2);
+        var p2 = await Db.GetAsync<Person>(id);
+        await Db.DeleteAsync(p2);
 
-        var deletedPerson = Db.Get<Person>(id);
+        var deletedPerson = await Db.GetAsync<Person>(id);
         Assert.Null(deletedPerson);
     }
 
     [Fact]
-    public void Delete_WithNullPredicate_ThrowsAnArgumentException()
-    {
-        ;
-
-        Assert.Throws<ArgumentNullException>(() => Db.Delete<Person>((object)null));
-    }
-
-    [Fact]
-    public void UsingCompositeKey_DeletesFromDatabase()
+    public async Task UsingCompositeKey_DeletesFromDatabase()
     {
         var m1 = new Multikey { Key2 = "key", Value = "bar" };
-        var key = Db.Insert(m1);
+        var key = await Db.InsertAsync(m1);
 
-        var m2 = Db.Get<Multikey>(new { key.Key1, key.Key2 });
-        Db.Delete(m2);
-        Assert.Null(Db.Get<Multikey>(new { key.Key1, key.Key2 }));
+        var m2 = await Db.GetAsync<Multikey>(new { key.Key1, key.Key2 });
+        await Db.DeleteAsync(m2);
+
+        var actualResults = await Db.GetAsync<Multikey>(new { key.Key1, key.Key2 });
+        Assert.Null(actualResults);
     }
 
     [Fact]
-    public void UsingPredicate_DeletesRows()
+    public async Task UsingPredicate_DeletesRows()
     {
         var p1 = new Person { Active = true, FirstName = "Foo", LastName = "Bar", DateCreated = DateTime.UtcNow };
         var p2 = new Person { Active = true, FirstName = "Foo", LastName = "Bar", DateCreated = DateTime.UtcNow };
         var p3 = new Person { Active = true, FirstName = "Foo", LastName = "Barz", DateCreated = DateTime.UtcNow };
-        Db.Insert(p1);
-        Db.Insert(p2);
-        Db.Insert(p3);
+        await Db.InsertAsync(p1);
+        await Db.InsertAsync(p2);
+        await Db.InsertAsync(p3);
 
-        var list = Db.List<Person>();
+        var list = await Db.ListAsync<Person>();
         Assert.Equal(3, list.Count());
 
         IPredicate? pred = Predicates.Field<Person>(p => p.LastName, Operator.Eq, "Bar");
-        var result = Db.Delete<Person>(pred);
+        var result = await Db.DeleteAsync<Person>(pred);
         Assert.True(result > 0);
 
-        list = Db.List<Person>();
+        list = await Db.ListAsync<Person>();
         Assert.Equal(1, list.Count());
     }
 
     [Fact]
-    public void UsingMultipleKeys_DeletesRows()
+    public async Task UsingMultipleKeys_DeletesRows()
     {
         var p1 = new Person { Active = true, FirstName = "Foo", LastName = "Bar", DateCreated = DateTime.UtcNow };
         var p2 = new Person { Active = true, FirstName = "Foo", LastName = "Bar", DateCreated = DateTime.UtcNow };
         var p3 = new Person { Active = true, FirstName = "Foo", LastName = "Barz", DateCreated = DateTime.UtcNow };
-        var person1 = Db.Insert(p1);
-        var person2 = Db.Insert(p2);
-        var person3 = Db.Insert(p3);
+        var person1 = await Db.InsertAsync(p1);
+        var person2 = await Db.InsertAsync(p2);
+        var person3 = await Db.InsertAsync(p3);
 
         var ids = new List<Person>
         {
@@ -126,33 +118,33 @@ public class DeleteMethodTest : SqlServerBaseFixture
             person3
         };
 
-        var list = Db.List<Person>();
-        Assert.Equal(3, list!.Count());
+        var list = await Db.ListAsync<Person>();
+        Assert.Equal(3, list.Count());
 
-        var result = Db.Delete<Person>(list);
+        var result = await Db.DeleteAsync<Person>(list);
         Assert.True(result > 0);
 
-        var actualPersonList = Db.List<Person>();
+        var actualPersonList = await Db.ListAsync<Person>();
         Assert.Empty(actualPersonList);
     }
 
     [Fact]
-    public void UsingObject_DeletesRows()
+    public async Task UsingObject_DeletesRows()
     {
         var p1 = new Person { Active = true, FirstName = "Foo", LastName = "Bar", DateCreated = DateTime.UtcNow };
         var p2 = new Person { Active = true, FirstName = "Foo", LastName = "Bar", DateCreated = DateTime.UtcNow };
         var p3 = new Person { Active = true, FirstName = "Foo", LastName = "Barz", DateCreated = DateTime.UtcNow };
-        Db.Insert(p1);
-        Db.Insert(p2);
-        Db.Insert(p3);
+        await Db.InsertAsync(p1);
+        await Db.InsertAsync(p2);
+        await Db.InsertAsync(p3);
 
-        var list = Db.List<Person>();
+        var list = await Db.ListAsync<Person>();
         Assert.Equal(3, list.Count());
 
-        var result = Db.Delete<Person>(new { LastName = "Bar" });
+        var result = await Db.DeleteAsync<Person>(new { LastName = "Bar" });
         Assert.True(result > 0);
 
-        list = Db.List<Person>();
-        Assert.Equal(1, list.Count());
+        list = await Db.ListAsync<Person>();
+        Assert.Single(list);
     }
 }
