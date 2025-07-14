@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>net8.0</TargetFrameworks>
-		<Version>2.0.0</Version>
+		<Version>$(VersionPrefix)</Version>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
@@ -78,7 +78,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.2" />
 		<PackageReference Include="Newtonsoft.Json" version="13.0.3" />
 		<PackageReference Include="Dapper" Version="2.1.66" />
 		<PackageReference Include="Slapper.AutoMapper" Version="2.0.5" targetFramework="$(TargetFramework)" />
@@ -88,7 +88,7 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' != 'net461' and '$(TargetFramework)' != 'net461'">
-		<PackageReference Include="Oracle.ManagedDataAccess.Core" Version="23.7.0" />
+		<PackageReference Include="Oracle.ManagedDataAccess.Core" Version="23.8.0" />
 		<PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
 	</ItemGroup>
 
